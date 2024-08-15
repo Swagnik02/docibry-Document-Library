@@ -1,13 +1,12 @@
+import 'package:docibry/models/document_model.dart';
 import 'package:flutter/material.dart';
 
 class DocCard extends StatelessWidget {
-  final String docCategory;
-  final String docName;
+  final DocModel docModel;
 
   const DocCard({
     super.key,
-    required this.docCategory,
-    required this.docName,
+    required this.docModel,
   });
 
   @override
@@ -22,7 +21,7 @@ class DocCard extends StatelessWidget {
       ),
       width: double.infinity,
       child: Text(
-        docName,
+        docModel.docName,
         style: const TextStyle(color: Colors.black, fontSize: 30),
       ),
     );

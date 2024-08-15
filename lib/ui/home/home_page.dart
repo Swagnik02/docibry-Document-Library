@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:docibry/constants/string_constants.dart';
+import 'package:docibry/models/document_model.dart';
 import 'package:docibry/ui/home/doc_category_filter_chip.dart';
 import 'package:docibry/ui/home/doc_card.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +34,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
-              // Navigate to profile page
+              log('message');
             },
           ),
         ],
@@ -45,7 +48,10 @@ class _HomePageState extends State<HomePage> {
               decoration: InputDecoration(
                 hintText: 'Search documents...',
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(25))),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(25),
+                  ),
+                ),
                 prefixIcon: Icon(Icons.search),
               ),
             ),
@@ -97,26 +103,16 @@ class _HomePageState extends State<HomePage> {
 
   List<Widget> _buildFilteredDocs() {
     final allDocs = [
-      const DocCard(
-        docCategory: StringDocCategory.identity,
-        docName: 'Aadhaar',
-      ),
-      const DocCard(
-        docCategory: StringDocCategory.education,
-        docName: 'Marksheet',
-      ),
-      const DocCard(
-        docCategory: StringDocCategory.health,
-        docName: 'Health Card',
-      ),
-      // Add more documents here
+      DocCard(docModel: doc1),
+      DocCard(docModel: doc2),
+      DocCard(docModel: doc3),
     ];
 
     if (selectedCategory == StringDocCategory.allCategory) {
       return allDocs;
     } else {
       return allDocs
-          .where((doc) => doc.docCategory == selectedCategory)
+          .where((doc) => doc.docModel.docCategory == selectedCategory)
           .toList();
     }
   }
