@@ -1,14 +1,11 @@
 import 'dart:developer';
-import 'package:docibry/models/document_model.dart';
 import 'package:flutter/material.dart';
+import 'package:docibry/models/document_model.dart';
 
 class DocCard extends StatelessWidget {
   final DocModel docModel;
 
-  const DocCard({
-    super.key,
-    required this.docModel,
-  });
+  const DocCard({super.key, required this.docModel});
 
   @override
   Widget build(BuildContext context) {

@@ -1,10 +1,11 @@
-import 'dart:developer';
-
-import 'package:docibry/constants/string_constants.dart';
-import 'package:docibry/models/document_model.dart';
-import 'package:docibry/ui/home/doc_category_filter_chip.dart';
-import 'package:docibry/ui/home/doc_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:docibry/blocs/document/document_bloc.dart';
+import 'package:docibry/blocs/document/document_event.dart';
+import 'package:docibry/blocs/document/document_state.dart';
+import 'package:docibry/constants/string_constants.dart';
+import 'doc_card.dart';
+import 'doc_category_filter_chip.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -34,7 +35,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
-              log('message');
+              // Navigate to profile or handle other actions
             },
           ),
         ],
@@ -82,38 +83,48 @@ class _HomePageState extends State<HomePage> {
           ),
           // Document tiles
           Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              scrollDirection: Axis.vertical,
-              child: Column(
-                children: _buildFilteredDocs(),
-              ),
+            child: BlocBuilder<DocumentBloc, DocumentState>(
+              builder: (context, state) {
+                if (state is DocumentLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is DocumentLoaded) {
+                  final filteredDocs = state.documents
+                      .where((doc) =>
+                          selectedCategory == StringDocCategory.allCategory ||
+                          doc.docCategory == selectedCategory)
+                      .toList();
+
+                  if (filteredDocs.isEmpty) {
+                    return const Center(child: Text('No documents found'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: filteredDocs.length,
+                    itemBuilder: (context, index) {
+                      return DocCard(docModel: filteredDocs[index]);
+                    },
+                  );
+                } else if (state is DocumentError) {
+                  return Center(child: Text('Error: ${state.error}'));
+                }
+                return const Center(child: Text('No documents available'));
+              },
             ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to add document page
+          // Navigate to add document page or trigger AddDocument event
+          context.read<DocumentBloc>().add(
+                const AddDocument(
+                  docName: 'New Document',
+                  docCategory: 'General',
+                ),
+              );
         },
         child: const Icon(Icons.add),
       ),
     );
-  }
-
-  List<Widget> _buildFilteredDocs() {
-    final allDocs = [
-      DocCard(docModel: doc1),
-      DocCard(docModel: doc2),
-      DocCard(docModel: doc3),
-    ];
-
-    if (selectedCategory == StringDocCategory.allCategory) {
-      return allDocs;
-    } else {
-      return allDocs
-          .where((doc) => doc.docModel.docCategory == selectedCategory)
-          .toList();
-    }
   }
 }

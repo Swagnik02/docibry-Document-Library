@@ -19,7 +19,6 @@ class DocModel {
     required this.docFile,
   });
 
-  // Example of a factory method to create a DocModel from a map (useful for deserialization)
   factory DocModel.fromMap(Map<String, dynamic> map) {
     return DocModel(
       uid: map['uid'] ?? '',
@@ -32,7 +31,6 @@ class DocModel {
     );
   }
 
-  // Method to convert DocModel to a map (useful for serialization)
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
@@ -46,13 +44,14 @@ class DocModel {
   }
 }
 
+// Sample documents for testing
 DocModel doc1 = DocModel(
   uid: '001',
   docName: 'Aadhaar',
   docCategory: StringDocCategory.identity,
   docId: '123456',
   holdersName: 'Swagnik',
-  dateAdded: DateTime(2024, 1, 15), // January 15, 2024
+  dateAdded: DateTime(2024, 1, 15),
   docFile: 'docFile',
 );
 
@@ -62,15 +61,16 @@ DocModel doc2 = DocModel(
   docCategory: StringDocCategory.education,
   docId: '12',
   holdersName: 'Swagnik',
-  dateAdded: DateTime(2023, 12, 22), // December 22, 2023
+  dateAdded: DateTime(2023, 12, 22),
   docFile: 'docFile',
 );
+
 DocModel doc3 = DocModel(
   uid: '003',
   docName: 'Health Card',
   docCategory: StringDocCategory.health,
   docId: '12',
   holdersName: 'Swagnik',
-  dateAdded: DateTime(2024, 2, 5), // February 5, 2024
+  dateAdded: DateTime(2024, 2, 5),
   docFile: 'docFile',
 );
