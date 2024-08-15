@@ -1,3 +1,4 @@
+import 'package:docibry/ui/document/add_document_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
@@ -115,13 +116,10 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to add document page or trigger AddDocument event
-          context.read<DocumentBloc>().add(
-                const AddDocument(
-                  docName: 'New Document',
-                  docCategory: 'General',
-                ),
-              );
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddDocumentPage()),
+          );
         },
         child: const Icon(Icons.add),
       ),
