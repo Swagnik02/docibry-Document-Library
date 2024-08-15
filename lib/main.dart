@@ -1,4 +1,5 @@
 import 'package:docibry/blocs/document/document_event.dart';
+import 'package:docibry/ui/document/add_document_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/document/document_bloc.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
       ),
       home: BlocProvider(
         create: (_) => DocumentBloc()..add(FetchDocuments()),
-        child: const HomePage(),
+        child: const AddDocumentPage(),
       ),
     );
   }

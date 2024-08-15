@@ -31,4 +31,6 @@ class StringDocCategory {
 class StringConstants {
   static const String appName = 'docibry';
   static const String appFullName = 'docibry: Document Library';
+  static const String stringDoc = 'Doc';
+  static const String stringData = 'Data';
 }
