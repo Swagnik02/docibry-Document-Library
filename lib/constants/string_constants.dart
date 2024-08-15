@@ -27,3 +27,8 @@ class StringDocCategory {
     miscellaneous,
   ];
 }
+
+class StringConstants {
+  static const String appName = 'docibry';
+  static const String appFullName = 'docibry: Document Library';
+}

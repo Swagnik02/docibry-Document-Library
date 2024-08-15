@@ -1,4 +1,6 @@
 import 'package:docibry/constants/string_constants.dart';
+import 'package:docibry/ui/home/doc_category_filter_chip.dart';
+import 'package:docibry/ui/home/doc_card.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -117,76 +119,5 @@ class _HomePageState extends State<HomePage> {
           .where((doc) => doc.docCategory == selectedCategory)
           .toList();
     }
-  }
-}
-
-class DocCategoryFilterChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final bool isDisabled;
-  final ValueChanged<String> onSelected;
-
-  const DocCategoryFilterChip({
-    super.key,
-    required this.label,
-    required this.isSelected,
-    this.isDisabled = false,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: ChoiceChip(
-        showCheckmark: false,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(35)),
-        ),
-        label: Text(
-          label,
-          style: TextStyle(
-            color: isDisabled
-                ? Colors.grey
-                : (isSelected
-                    ? Theme.of(context).colorScheme.onPrimary
-                    : Colors.black),
-          ),
-        ),
-        selected: isSelected,
-        backgroundColor: isDisabled ? Colors.grey.shade200 : Colors.transparent,
-        selectedColor: Theme.of(context).colorScheme.primary,
-        onSelected: isDisabled ? null : (_) => onSelected(label),
-      ),
-    );
-  }
-}
-
-class DocCard extends StatelessWidget {
-  final String docCategory;
-  final String docName;
-
-  const DocCard({
-    super.key,
-    required this.docCategory,
-    required this.docName,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 150,
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(top: 16, right: 16, left: 16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(25),
-      ),
-      width: double.infinity,
-      child: Text(
-        docName,
-        style: const TextStyle(color: Colors.black, fontSize: 30),
-      ),
-    );
   }
 }
