@@ -13,7 +13,8 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
       FetchDocuments event, Emitter<DocumentState> emit) async {
     try {
       emit(DocumentLoading());
-      final documents = [doc1, doc2, doc3]; // Mock data
+      // Fetch documents from a data source (e.g., API, database)
+      final List<DocModel> documents = []; // Explicitly define the type
       emit(DocumentLoaded(documents: documents));
     } catch (e) {
       emit(DocumentError(error: e.toString()));
@@ -25,13 +26,13 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
       final updatedDocs =
           List<DocModel>.from((state as DocumentLoaded).documents)
             ..add(DocModel(
-              uid: '004', // Generate UID
+              uid: 'new_uid', // Generate a new UID
               docName: event.docName,
               docCategory: event.docCategory,
-              docId: 'new_id', // Generate new ID
-              holdersName: 'Swagnik',
+              docId: event.docId,
+              holdersName: event.holdersName,
               dateAdded: DateTime.now(),
-              docFile: 'docFile',
+              docFile: 'path_to_file', // Update with the actual file path
             ));
       emit(DocumentLoaded(documents: updatedDocs));
     }

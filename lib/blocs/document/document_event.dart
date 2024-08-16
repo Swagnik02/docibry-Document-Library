@@ -12,9 +12,16 @@ class FetchDocuments extends DocumentEvent {}
 class AddDocument extends DocumentEvent {
   final String docName;
   final String docCategory;
+  final String docId;
+  final String holdersName;
 
-  const AddDocument({required this.docName, required this.docCategory});
+  const AddDocument({
+    required this.docName,
+    required this.docCategory,
+    required this.docId,
+    required this.holdersName,
+  });
 
   @override
-  List<Object?> get props => [docName, docCategory];
+  List<Object?> get props => [docName, docCategory, docId, holdersName];
 }

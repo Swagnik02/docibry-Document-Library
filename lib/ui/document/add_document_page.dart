@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/constants/string_constants.dart';
+import 'package:docibry/models/document_model.dart';
 import 'package:docibry/ui/document/custom_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,6 +19,9 @@ class _AddDocumentPageState extends State<AddDocumentPage>
     with SingleTickerProviderStateMixin {
   String? _selectedCategory;
   late TabController _tabController;
+  late TextEditingController _docNameController;
+  late TextEditingController _docIdController;
+  late TextEditingController _holderNameController;
 
   @override
   void initState() {
@@ -24,11 +30,17 @@ class _AddDocumentPageState extends State<AddDocumentPage>
         ? StringDocCategory.categoryList.first
         : null;
     _tabController = TabController(length: 2, vsync: this);
+    _docNameController = TextEditingController();
+    _docIdController = TextEditingController();
+    _holderNameController = TextEditingController();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _docNameController.dispose();
+    _docIdController.dispose();
+    _holderNameController.dispose();
     super.dispose();
   }
 
@@ -54,7 +66,7 @@ class _AddDocumentPageState extends State<AddDocumentPage>
         children: [
           docNameTextField(),
           customTabs(),
-          submitButton(),
+          submitButton(context),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -81,27 +93,14 @@ class _AddDocumentPageState extends State<AddDocumentPage>
     );
   }
 
-  Container submitButton() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-      padding: const EdgeInsets.all(20),
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: () {
-          // Handle submit action
-        },
-        child: const Text('SUBMIT'),
-      ),
-    );
-  }
-
   Padding docNameTextField() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 80, vertical: 16),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 16),
       child: TextField(
+        controller: _docNameController,
         textCapitalization: TextCapitalization.words,
         textAlign: TextAlign.center,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           hintText: 'Enter Document Name',
           border: OutlineInputBorder(
             borderRadius: BorderRadius.all(
@@ -127,12 +126,7 @@ class _AddDocumentPageState extends State<AddDocumentPage>
             children: [
               IconButton(
                 onPressed: () {
-                  // context.read<DocumentBloc>().add(
-                  //       const AddDocument(
-                  //         docName: 'New Document',
-                  //         docCategory: 'General',
-                  //       ),
-                  //     );
+                  // Handle document upload
                 },
                 icon: const Icon(Icons.add),
               ),
@@ -181,19 +175,21 @@ class _AddDocumentPageState extends State<AddDocumentPage>
                   },
                   hint: const Text('Select Category'),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: TextField(
-                    decoration: InputDecoration(
+                    controller: _docIdController,
+                    decoration: const InputDecoration(
                       labelText: "Document ID",
                       border: OutlineInputBorder(),
                     ),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: TextField(
-                    decoration: InputDecoration(
+                    controller: _holderNameController,
+                    decoration: const InputDecoration(
                       labelText: "Holder's Name",
                       border: OutlineInputBorder(),
                     ),
@@ -204,6 +200,49 @@ class _AddDocumentPageState extends State<AddDocumentPage>
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Container submitButton(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: () {
+          if (_docNameController.text.isNotEmpty &&
+              _docIdController.text.isNotEmpty &&
+              _holderNameController.text.isNotEmpty &&
+              _selectedCategory != null) {
+            final docModel = DocModel(
+              uid: 'new_uid', // Generate UID
+              docName: _docNameController.text,
+              docCategory: _selectedCategory.toString(),
+              docId: _docIdController.text,
+              holdersName: _holderNameController.text,
+              dateAdded: DateTime.now(),
+              docFile: 'docFile', // Update with actual file path
+            );
+
+            log(docModel.toMap().toString());
+
+            context.read<DocumentBloc>().add(
+                  AddDocument(
+                    docName: docModel.docName,
+                    docCategory: docModel.docCategory,
+                    docId: docModel.docId,
+                    holdersName: docModel.holdersName,
+                  ),
+                );
+          } else {
+            // Handle form validation errors
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Please fill all fields')),
+            );
+          }
+        },
+        child: const Text('SUBMIT'),
       ),
     );
   }
