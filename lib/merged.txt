@@ -1,4 +1,4 @@
-Date: 2024-08-16 18:28:23
+Date: 2024-08-16 18:40:16
 
 Root File Path: g:\coding\docibry\lib
 Directory Tree:
@@ -44,6 +44,7 @@ Directory Tree:
 
 
 --- ./main.dart ---
+import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/constants/string_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -61,7 +62,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => DocumentBloc(),
+      create: (_) => DocumentBloc()..add(FetchDocuments()),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: StringConstants.appFullName,
@@ -119,8 +120,10 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
               dateAdded: DateTime.now(),
               docFile: 'path_to_file', // Update with the actual file path
             ));
-      log('success message');
+      log('Document added successfully'); // Log success message
       emit(DocumentLoaded(documents: updatedDocs));
+    } else {
+      log('Document state is not loaded'); // Log error if state is incorrect
     }
   }
 }
@@ -392,6 +395,7 @@ import 'dart:developer';
 
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
+import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/models/document_model.dart';
 import 'package:docibry/ui/document/custom_tab.dart';
@@ -452,12 +456,25 @@ class _AddDocumentPageState extends State<AddDocumentPage>
           ),
         ],
       ),
-      body: Column(
-        children: [
-          docNameTextField(),
-          customTabs(),
-          submitButton(context),
-        ],
+      body: BlocListener<DocumentBloc, DocumentState>(
+        listener: (context, state) {
+          if (state is DocumentLoaded) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Document added successfully!')),
+            );
+          } else if (state is DocumentError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${state.error}')),
+            );
+          }
+        },
+        child: Column(
+          children: [
+            docNameTextField(),
+            customTabs(),
+            submitButton(context),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -611,7 +628,7 @@ class _AddDocumentPageState extends State<AddDocumentPage>
               docId: _docIdController.text,
               holdersName: _holderNameController.text,
               dateAdded: DateTime.now(),
-              docFile: 'docFile', // Update with actual file path
+              docFile: 'docFile',
             );
 
             log(docModel.toMap().toString());
@@ -624,7 +641,7 @@ class _AddDocumentPageState extends State<AddDocumentPage>
                     holdersName: docModel.holdersName,
                   ),
                 );
-            // Navigator.pop(context);
+            Navigator.pop(context);
           } else {
             // Handle form validation errors
             ScaffoldMessenger.of(context).showSnackBar(

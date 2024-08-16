@@ -26,8 +26,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    DocumentBloc()..add(FetchDocuments());
     super.initState();
+    context.read<DocumentBloc>().add(FetchDocuments());
   }
 
   @override

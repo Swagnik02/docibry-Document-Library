@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/blocs/document/document_state.dart';
@@ -54,21 +53,16 @@ class _AddDocumentPageState extends State<AddDocumentPage>
           'Add Document',
           style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.pushNamed(context, '/profile');
-            },
-          ),
-        ],
       ),
       body: BlocListener<DocumentBloc, DocumentState>(
         listener: (context, state) {
           if (state is DocumentLoaded) {
+            // Show success message
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Document added successfully!')),
             );
+            // Navigate back to HomePage
+            Navigator.pop(context);
           } else if (state is DocumentError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Error: ${state.error}')),
@@ -248,7 +242,6 @@ class _AddDocumentPageState extends State<AddDocumentPage>
                     holdersName: docModel.holdersName,
                   ),
                 );
-            Navigator.pop(context);
           } else {
             // Handle form validation errors
             ScaffoldMessenger.of(context).showSnackBar(

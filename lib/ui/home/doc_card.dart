@@ -29,7 +29,7 @@ class DocCard extends StatelessWidget {
         width: double.infinity,
         child: Text(
           docModel.docName,
-          style: const TextStyle(color: Colors.black),
+          style: const TextStyle(color: Colors.black, fontSize: 30),
         ),
       ),
     );
