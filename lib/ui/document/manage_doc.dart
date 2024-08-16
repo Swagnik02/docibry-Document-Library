@@ -8,14 +8,14 @@ import 'package:docibry/ui/document/custom_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class AddDocumentPage extends StatefulWidget {
-  const AddDocumentPage({super.key});
+class ManageDocumentPage extends StatefulWidget {
+  const ManageDocumentPage({super.key});
 
   @override
-  _AddDocumentPageState createState() => _AddDocumentPageState();
+  _ManageDocumentPageState createState() => _ManageDocumentPageState();
 }
 
-class _AddDocumentPageState extends State<AddDocumentPage>
+class _ManageDocumentPageState extends State<ManageDocumentPage>
     with SingleTickerProviderStateMixin {
   String? _selectedCategory;
   late TabController _tabController;

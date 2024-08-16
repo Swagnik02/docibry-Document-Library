@@ -1,4 +1,4 @@
-import 'package:docibry/ui/document/add_document_page.dart';
+import 'package:docibry/ui/document/manage_doc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
@@ -124,7 +124,7 @@ class _HomePageState extends State<HomePage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddDocumentPage()),
+            MaterialPageRoute(builder: (context) => const ManageDocumentPage()),
           );
         },
         child: const Icon(Icons.add),

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/document/document_bloc.dart';
 import 'ui/home/home_page.dart';
-import 'ui/document/add_document_page.dart';
+import 'ui/document/manage_doc.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         ),
         home: const HomePage(),
         routes: {
-          '/addDocument': (context) => const AddDocumentPage(),
+          '/addDocument': (context) => const ManageDocumentPage(),
           // '/documentViewEdit': (context) => const DocumentViewEditPage(),
           // '/profile': (context) => const ProfilePage(),
         },
