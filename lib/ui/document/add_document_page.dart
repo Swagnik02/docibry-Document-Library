@@ -70,8 +70,16 @@ class _AddDocumentPageState extends State<AddDocumentPage>
           ),
 
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+            margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
             decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3),
+                ),
+              ],
               color: Theme.of(context).colorScheme.surfaceContainerLow,
               borderRadius: BorderRadius.circular(25.0),
             ),
@@ -82,6 +90,7 @@ class _AddDocumentPageState extends State<AddDocumentPage>
                 color: Colors.black,
                 borderRadius: BorderRadius.circular(25),
               ),
+              dividerColor: Colors.transparent,
               labelColor: Theme.of(context).colorScheme.surfaceContainerLow,
               unselectedLabelColor: Colors.black,
               labelStyle: const TextStyle(fontWeight: FontWeight.bold),
