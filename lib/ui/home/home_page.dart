@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'docibry',
+          StringConstants.appName,
           style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
         ),
         actions: [
