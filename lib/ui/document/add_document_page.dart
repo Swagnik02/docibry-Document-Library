@@ -1,6 +1,7 @@
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/constants/string_constants.dart';
+import 'package:docibry/ui/document/custom_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,8 +23,7 @@ class _AddDocumentPageState extends State<AddDocumentPage>
     _selectedCategory = StringDocCategory.categoryList.isNotEmpty
         ? StringDocCategory.categoryList.first
         : null;
-    _tabController =
-        TabController(length: 2, vsync: this); // Adjust length as needed
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -53,8 +53,7 @@ class _AddDocumentPageState extends State<AddDocumentPage>
       body: Column(
         children: [
           docNameTextField(),
-          tabBar(context),
-          tabBody(),
+          customTabs(),
           submitButton(),
         ],
       ),
@@ -67,48 +66,16 @@ class _AddDocumentPageState extends State<AddDocumentPage>
     );
   }
 
-  Expanded tabBody() {
+  Expanded customTabs() {
     return Expanded(
-      child: TabBarView(
-        controller: _tabController,
-        children: [
-          tab1(),
-          tab2(),
-        ],
-      ),
-    );
-  }
-
-  Container tabBar(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(25.0),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        indicatorSize: TabBarIndicatorSize.tab,
-        indicator: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(25),
-        ),
-        dividerColor: Colors.transparent,
-        labelColor: Theme.of(context).colorScheme.surfaceContainerLow,
-        unselectedLabelColor: Colors.black,
-        labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+      child: CustomTabBarView(
         tabs: const [
           Tab(text: StringConstants.stringDoc),
           Tab(text: StringConstants.stringData),
+        ],
+        tabViews: [
+          tab1(),
+          tab2(),
         ],
       ),
     );

@@ -1,75 +1,72 @@
 import 'package:flutter/material.dart';
 
-class TabScaffold extends StatefulWidget {
-  final String title;
-  final List<String> tabNames;
-  final List<Widget> tabContents;
-  final Color backgroundColor;
-  final Color tabColor;
-  final Color selectedTabColor;
-  final Color unselectedTabColor;
-  final TextStyle labelStyle;
-  final TextStyle unselectedLabelStyle;
+class CustomTabBarView extends StatefulWidget {
+  final List<Widget> tabs;
+  final List<Widget> tabViews;
 
-  const TabScaffold({
+  const CustomTabBarView({
     super.key,
-    required this.title,
-    required this.tabNames,
-    required this.tabContents,
-    this.backgroundColor = Colors.white,
-    this.tabColor = const Color(0xFFFFd0c8),
-    this.selectedTabColor = Colors.black,
-    this.unselectedTabColor = Colors.black,
-    this.labelStyle = const TextStyle(fontWeight: FontWeight.bold),
-    this.unselectedLabelStyle = const TextStyle(fontWeight: FontWeight.bold),
-  }) : assert(tabNames.length == tabContents.length);
+    required this.tabs,
+    required this.tabViews,
+  });
 
   @override
-  _TabScaffoldState createState() => _TabScaffoldState();
+  _CustomTabBarViewState createState() => _CustomTabBarViewState();
 }
 
-class _TabScaffoldState extends State<TabScaffold>
+class _CustomTabBarViewState extends State<CustomTabBarView>
     with SingleTickerProviderStateMixin {
-  TabController? _tabController;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: widget.tabNames.length, vsync: this);
+    _tabController = TabController(length: widget.tabs.length, vsync: this);
   }
 
   @override
   void dispose() {
-    _tabController?.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Column(
       children: [
-        TabBarView(
-          controller: _tabController,
-          children: widget.tabContents,
-        ),
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
+          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
           decoration: BoxDecoration(
-            color: widget.tabColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+            ],
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(25.0),
           ),
           child: TabBar(
             controller: _tabController,
             indicatorSize: TabBarIndicatorSize.tab,
             indicator: BoxDecoration(
-              color: widget.selectedTabColor,
+              color: Colors.black,
               borderRadius: BorderRadius.circular(25),
             ),
-            labelColor: widget.tabColor,
-            unselectedLabelColor: widget.unselectedTabColor,
-            labelStyle: widget.labelStyle,
-            unselectedLabelStyle: widget.unselectedLabelStyle,
-            tabs: widget.tabNames.map((name) => Tab(text: name)).toList(),
+            dividerColor: Colors.transparent,
+            labelColor: Theme.of(context).colorScheme.surfaceContainerLow,
+            unselectedLabelColor: Colors.black,
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+            tabs: widget.tabs,
+          ),
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: widget.tabViews,
           ),
         ),
       ],
