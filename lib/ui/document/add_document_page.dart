@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
+import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/models/document_model.dart';
 import 'package:docibry/ui/document/custom_tab.dart';
@@ -57,21 +58,34 @@ class _AddDocumentPageState extends State<AddDocumentPage>
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
-              // Navigate to profile or handle other actions
+              Navigator.pushNamed(context, '/profile');
             },
           ),
         ],
       ),
-      body: Column(
-        children: [
-          docNameTextField(),
-          customTabs(),
-          submitButton(context),
-        ],
+      body: BlocListener<DocumentBloc, DocumentState>(
+        listener: (context, state) {
+          if (state is DocumentLoaded) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Document added successfully!')),
+            );
+          } else if (state is DocumentError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${state.error}')),
+            );
+          }
+        },
+        child: Column(
+          children: [
+            docNameTextField(),
+            customTabs(),
+            submitButton(context),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to add document page or trigger AddDocument event
+          Navigator.pushNamed(context, '/addDocument');
         },
         child: const Icon(Icons.share),
       ),
@@ -195,7 +209,6 @@ class _AddDocumentPageState extends State<AddDocumentPage>
                     ),
                   ),
                 ),
-                // Add a date picker or date viewer here
               ],
             ),
           ),
@@ -222,7 +235,7 @@ class _AddDocumentPageState extends State<AddDocumentPage>
               docId: _docIdController.text,
               holdersName: _holderNameController.text,
               dateAdded: DateTime.now(),
-              docFile: 'docFile', // Update with actual file path
+              docFile: 'docFile',
             );
 
             log(docModel.toMap().toString());
@@ -235,6 +248,7 @@ class _AddDocumentPageState extends State<AddDocumentPage>
                     holdersName: docModel.holdersName,
                   ),
                 );
+            Navigator.pop(context);
           } else {
             // Handle form validation errors
             ScaffoldMessenger.of(context).showSnackBar(

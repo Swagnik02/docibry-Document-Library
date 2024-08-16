@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/document/document_bloc.dart';
 import 'ui/home/home_page.dart';
+import 'ui/document/add_document_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,15 +15,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: StringConstants.appFullName,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-      ),
-      home: BlocProvider(
-        create: (_) => DocumentBloc()..add(FetchDocuments()),
-        child: const HomePage(),
+    return BlocProvider(
+      create: (_) => DocumentBloc()..add(FetchDocuments()),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: StringConstants.appFullName,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+        ),
+        home: const HomePage(),
+        routes: {
+          '/addDocument': (context) => const AddDocumentPage(),
+          // '/documentViewEdit': (context) => const DocumentViewEditPage(),
+          // '/profile': (context) => const ProfilePage(),
+        },
       ),
     );
   }

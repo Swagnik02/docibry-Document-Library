@@ -12,6 +12,11 @@ class DocCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         log(docModel.toMap().toString());
+        Navigator.pushNamed(
+          context,
+          '/documentViewEdit',
+          arguments: docModel, // Pass the document model as an argument
+        );
       },
       child: Container(
         height: 150,
@@ -24,7 +29,7 @@ class DocCard extends StatelessWidget {
         width: double.infinity,
         child: Text(
           docModel.docName,
-          style: const TextStyle(color: Colors.black, fontSize: 30),
+          style: const TextStyle(color: Colors.black),
         ),
       ),
     );

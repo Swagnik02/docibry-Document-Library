@@ -25,6 +25,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void initState() {
+    DocumentBloc()..add(FetchDocuments());
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

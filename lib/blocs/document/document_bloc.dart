@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:docibry/models/document_model.dart';
 import 'document_event.dart';
@@ -34,7 +36,10 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
               dateAdded: DateTime.now(),
               docFile: 'path_to_file', // Update with the actual file path
             ));
+      log('Document added successfully'); // Log success message
       emit(DocumentLoaded(documents: updatedDocs));
+    } else {
+      log('Document state is not loaded'); // Log error if state is incorrect
     }
   }
 }
