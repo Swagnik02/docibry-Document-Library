@@ -52,78 +52,10 @@ class _AddDocumentPageState extends State<AddDocumentPage>
       ),
       body: Column(
         children: [
-          // Constant Widget: Enter Document Name
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 80, vertical: 16),
-            child: TextField(
-              textCapitalization: TextCapitalization.words,
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                hintText: 'Enter Document Name',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
-                ),
-              ],
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(25.0),
-            ),
-            child: TabBar(
-              controller: _tabController,
-              indicatorSize: TabBarIndicatorSize.tab,
-              indicator: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(25),
-              ),
-              dividerColor: Colors.transparent,
-              labelColor: Theme.of(context).colorScheme.surfaceContainerLow,
-              unselectedLabelColor: Colors.black,
-              labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-              unselectedLabelStyle:
-                  const TextStyle(fontWeight: FontWeight.bold),
-              tabs: const [
-                Tab(text: StringConstants.stringDoc),
-                Tab(text: StringConstants.stringData),
-              ],
-            ),
-          ),
-
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                tab1(),
-                tab2(),
-              ],
-            ),
-          ),
-          // Constant Widget: Submit Button
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 50, vertical: 16),
-            padding: EdgeInsets.all(20),
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {
-                // Handle submit action
-              },
-              child: const Text('SUBMIT'),
-            ),
-          ),
+          docNameTextField(),
+          tabBar(context),
+          tabBody(),
+          submitButton(),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -131,6 +63,85 @@ class _AddDocumentPageState extends State<AddDocumentPage>
           // Navigate to add document page or trigger AddDocument event
         },
         child: const Icon(Icons.share),
+      ),
+    );
+  }
+
+  Expanded tabBody() {
+    return Expanded(
+      child: TabBarView(
+        controller: _tabController,
+        children: [
+          tab1(),
+          tab2(),
+        ],
+      ),
+    );
+  }
+
+  Container tabBar(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(25.0),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicator: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(25),
+        ),
+        dividerColor: Colors.transparent,
+        labelColor: Theme.of(context).colorScheme.surfaceContainerLow,
+        unselectedLabelColor: Colors.black,
+        labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+        tabs: const [
+          Tab(text: StringConstants.stringDoc),
+          Tab(text: StringConstants.stringData),
+        ],
+      ),
+    );
+  }
+
+  Container submitButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: () {
+          // Handle submit action
+        },
+        child: const Text('SUBMIT'),
+      ),
+    );
+  }
+
+  Padding docNameTextField() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 80, vertical: 16),
+      child: TextField(
+        textCapitalization: TextCapitalization.words,
+        textAlign: TextAlign.center,
+        decoration: InputDecoration(
+          hintText: 'Enter Document Name',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -156,9 +167,9 @@ class _AddDocumentPageState extends State<AddDocumentPage>
                   //       ),
                   //     );
                 },
-                icon: Icon(Icons.add),
+                icon: const Icon(Icons.add),
               ),
-              Text('Add doc'),
+              const Text('Add doc'),
             ],
           ),
         ),
@@ -184,7 +195,7 @@ class _AddDocumentPageState extends State<AddDocumentPage>
               children: [
                 DropdownButton<String>(
                   elevation: 1,
-                  padding: EdgeInsets.symmetric(horizontal: 30),
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
                   focusColor: Colors.transparent,
                   dropdownColor: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(10),
@@ -201,7 +212,7 @@ class _AddDocumentPageState extends State<AddDocumentPage>
                       _selectedCategory = newValue;
                     });
                   },
-                  hint: Text('Select Category'),
+                  hint: const Text('Select Category'),
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 8.0),
