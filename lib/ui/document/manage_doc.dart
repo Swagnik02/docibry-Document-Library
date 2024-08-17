@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/blocs/document/document_state.dart';
@@ -6,6 +9,7 @@ import 'package:docibry/models/document_model.dart';
 import 'package:docibry/ui/document/custom_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ManageDocumentPage extends StatefulWidget {
   final bool isAdd;
@@ -25,6 +29,9 @@ class ManageDocumentPage extends StatefulWidget {
 
 class ManageDocumentPageState extends State<ManageDocumentPage>
     with SingleTickerProviderStateMixin {
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+
   String? _selectedCategory;
   late TabController _tabController;
   late TextEditingController _docNameController;
@@ -147,30 +154,66 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     );
   }
 
+// imagepicking fn
+  Future<void> _pickImage() async {
+    // Request permission
+    var status = await Permission.photos.status;
+
+    if (!status.isGranted) {
+      status = await Permission.photos.request();
+    }
+
+    if (status.isGranted) {
+      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      setState(() {
+        if (pickedFile != null) {
+          _image = File(pickedFile.path);
+        } else {
+          print('No image selected.');
+        }
+      });
+    } else {
+      // Permission denied
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Permission denied. Please enable permissions from settings.'),
+        ),
+      );
+    }
+  }
+
   Widget tab1() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: SizedBox(
         height: 500,
         width: double.infinity,
-        child: Card(
-          elevation: 3,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (widget.isAdd) ...[
-                IconButton(
-                  onPressed: () {
-                    // Handle document upload
-                  },
-                  icon: const Icon(Icons.add),
-                ),
-                const Text(StringConstants.stringAddFile),
-              ] else ...[
-                const Text('Image Placeholder'),
-              ],
-            ],
+        child: GestureDetector(
+          onTap: () async {
+            await _pickImage();
+            setState(() {});
+            log('Image selected');
+          },
+          child: Card(
+            elevation: 3,
+            child: _image == null
+                ? const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add, size: 50, color: Colors.grey),
+                      Text(StringConstants.stringAddFile),
+                    ],
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(10.0),
+                    child: Image.file(
+                      _image!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  ),
           ),
         ),
       ),
