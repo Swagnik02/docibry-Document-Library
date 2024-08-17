@@ -1,4 +1,5 @@
 import 'package:docibry/constants/routes.dart';
+import 'package:docibry/services/db_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
@@ -42,7 +43,11 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
-              // Navigate to profile or handle other actions
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => DbViewPage(),
+                ),
+              );
             },
           ),
         ],

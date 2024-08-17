@@ -1,3 +1,4 @@
+import 'package:docibry/models/document_model.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class DocumentEvent extends Equatable {
@@ -24,4 +25,22 @@ class AddDocument extends DocumentEvent {
 
   @override
   List<Object?> get props => [docName, docCategory, docId, holdersName];
+}
+
+class UpdateDocument extends DocumentEvent {
+  final DocModel document;
+
+  const UpdateDocument({required this.document});
+
+  @override
+  List<Object?> get props => [document];
+}
+
+class DeleteDocument extends DocumentEvent {
+  final String uid;
+
+  const DeleteDocument({required this.uid});
+
+  @override
+  List<Object?> get props => [uid];
 }

@@ -1,7 +1,7 @@
 import 'package:docibry/constants/string_constants.dart';
 
 class DocModel {
-  final String uid;
+  final int uid;
   final String docName;
   final String docCategory;
   final String docId;
@@ -19,18 +19,6 @@ class DocModel {
     required this.docFile,
   });
 
-  factory DocModel.fromMap(Map<String, dynamic> map) {
-    return DocModel(
-      uid: map['uid'] ?? '',
-      docName: map['docName'] ?? '',
-      docCategory: map['docCategory'] ?? '',
-      docId: map['docId'] ?? '',
-      holdersName: map['holdersName'] ?? '',
-      dateAdded: DateTime.parse(map['dateAdded'] ?? DateTime.now().toString()),
-      docFile: map['docFile'] ?? '',
-    );
-  }
-
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
@@ -38,15 +26,27 @@ class DocModel {
       'docCategory': docCategory,
       'docId': docId,
       'holdersName': holdersName,
-      'dateAdded': dateAdded.toIso8601String(),
+      'dateAdded': dateAdded.millisecondsSinceEpoch,
       'docFile': docFile,
     };
+  }
+
+  factory DocModel.fromMap(Map<String, dynamic> map) {
+    return DocModel(
+      uid: map['uid'],
+      docName: map['docName'],
+      docCategory: map['docCategory'],
+      docId: map['docId'],
+      holdersName: map['holdersName'],
+      dateAdded: DateTime.parse(map['dateAdded']),
+      docFile: map['docFile'],
+    );
   }
 }
 
 // Sample documents for testing
 DocModel doc1 = DocModel(
-  uid: '001',
+  uid: 001,
   docName: 'Aadhaar',
   docCategory: StringDocCategory.identity,
   docId: '123456',
@@ -56,7 +56,7 @@ DocModel doc1 = DocModel(
 );
 
 DocModel doc2 = DocModel(
-  uid: '002',
+  uid: 002,
   docName: 'Marksheet',
   docCategory: StringDocCategory.education,
   docId: '12',
@@ -66,7 +66,7 @@ DocModel doc2 = DocModel(
 );
 
 DocModel doc3 = DocModel(
-  uid: '003',
+  uid: 003,
   docName: 'Health Card',
   docCategory: StringDocCategory.health,
   docId: '12',

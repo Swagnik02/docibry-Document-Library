@@ -2,53 +2,58 @@ import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
 import 'package:docibry/models/document_model.dart';
+import 'package:docibry/services/database_helper.dart';
 import 'document_event.dart';
 import 'document_state.dart';
 
 class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
-  // Counter to track the current UID
-  int _uidCounter = 0;
+  final DatabaseHelper _dbHelper = DatabaseHelper();
 
   DocumentBloc() : super(DocumentInitial()) {
     on<FetchDocuments>(_onFetchDocuments);
     on<AddDocument>(_onAddDocument);
   }
 
-  void _onFetchDocuments(
+  Future<void> _onFetchDocuments(
       FetchDocuments event, Emitter<DocumentState> emit) async {
     try {
       emit(DocumentLoading());
-      // Fetch documents from a data source (e.g., API, database)
-      final List<DocModel> documents = []; // Explicitly define the type
-      // Initialize _uidCounter based on existing documents, if needed
-      _uidCounter = documents.length;
+      final List<DocModel> documents = await _dbHelper.getDocuments();
       emit(DocumentLoaded(documents: documents));
     } catch (e) {
+      log('Error fetching documents: $e');
       emit(DocumentError(error: e.toString()));
     }
   }
 
-  void _onAddDocument(AddDocument event, Emitter<DocumentState> emit) {
-    if (state is DocumentLoaded) {
-      // Increment the UID counter
-      _uidCounter++;
+  Future<void> _onAddDocument(
+      AddDocument event, Emitter<DocumentState> emit) async {
+    try {
+      if (state is DocumentLoaded) {
+        final doc = DocModel(
+          uid: DateTime.now().millisecondsSinceEpoch,
+          docName: event.docName,
+          docCategory: event.docCategory,
+          docId: event.docId,
+          holdersName: event.holdersName,
+          dateAdded: DateTime.now(),
+          docFile: 'path_to_file',
+        );
 
-      final updatedDocs =
-          List<DocModel>.from((state as DocumentLoaded).documents)
-            ..add(DocModel(
-              uid: 'D$_uidCounter',
-              docName: event.docName,
-              docCategory: event.docCategory,
-              docId: event.docId,
-              holdersName: event.holdersName,
-              dateAdded: DateTime.now(),
-              docFile: 'path_to_file',
-            ));
+        await _dbHelper.insertDocument(doc);
 
-      log('Document added successfully');
-      emit(DocumentLoaded(documents: updatedDocs));
-    } else {
-      log('Document state is not loaded');
+        final documents = await _dbHelper.getDocuments();
+        emit(DocumentLoaded(documents: documents));
+
+        log('Document added successfully');
+      } else {
+        log('Document state is not loaded');
+      }
+    } catch (e) {
+      log('Error adding document: $e');
+      emit(DocumentError(error: e.toString()));
     }
   }
+
+  // Add other event handlers (e.g., UpdateDocument, DeleteDocument) as needed
 }
