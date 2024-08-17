@@ -33,4 +33,8 @@ class StringConstants {
   static const String appFullName = 'docibry: Document Library';
   static const String stringDoc = 'Doc';
   static const String stringData = 'Data';
+  static const String stringAddDoc = 'Add Document';
+  static const String stringViewDoc = 'View Document';
+  static const String stringAddDocSuccess = 'Document added successfully!';
+  static const String stringError = 'Error:';
 }

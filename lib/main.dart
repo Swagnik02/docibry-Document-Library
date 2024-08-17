@@ -1,4 +1,5 @@
 import 'package:docibry/blocs/document/document_event.dart';
+import 'package:docibry/constants/routes.dart';
 import 'package:docibry/constants/string_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,9 +26,9 @@ class MyApp extends StatelessWidget {
         ),
         home: const HomePage(),
         routes: {
-          '/addDocument': (context) => const ManageDocumentPage(),
-          // '/documentViewEdit': (context) => const DocumentViewEditPage(),
-          // '/profile': (context) => const ProfilePage(),
+          homeRoute: (context) => const HomePage(),
+          addDocRoute: (context) => const ManageDocumentPage(isAdd: true),
+          viewDocRoute: (context) => const ManageDocumentPage(isAdd: false),
         },
       ),
     );

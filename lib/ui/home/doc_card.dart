@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:docibry/ui/document/manage_doc.dart';
 import 'package:flutter/material.dart';
 import 'package:docibry/models/document_model.dart';
 
@@ -12,10 +13,23 @@ class DocCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         log(docModel.toMap().toString());
-        Navigator.pushNamed(
+        // Navigator.pushNamed(
+        //   context,
+        //   '/viewDocument',
+        //   arguments: {
+        //     'document': docModel,
+        //   },
+        // );
+
+        Navigator.push(
           context,
-          '/documentViewEdit',
-          arguments: docModel, // Pass the document model as an argument
+          MaterialPageRoute(
+            builder: (context) => ManageDocumentPage(
+              isAdd: false,
+              // isView: true,
+              document: docModel,
+            ),
+          ),
         );
       },
       child: Container(
