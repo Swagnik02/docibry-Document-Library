@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
@@ -30,6 +29,7 @@ class ManageDocumentPage extends StatefulWidget {
 class ManageDocumentPageState extends State<ManageDocumentPage>
     with SingleTickerProviderStateMixin {
   File? _image;
+
   final ImagePicker _picker = ImagePicker();
 
   String? _selectedCategory;
@@ -154,9 +154,8 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     );
   }
 
-// imagepicking fn
+  // imagepicking fn
   Future<void> _pickImage() async {
-    // Request permission
     var status = await Permission.photos.status;
 
     if (!status.isGranted) {
@@ -191,29 +190,35 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         width: double.infinity,
         child: GestureDetector(
           onTap: () async {
-            await _pickImage();
-            setState(() {});
-            log('Image selected');
+            _pickImage();
           },
           child: Card(
             elevation: 3,
-            child: _image == null
-                ? const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add, size: 50, color: Colors.grey),
-                      Text(StringConstants.stringAddFile),
-                    ],
-                  )
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(10.0),
-                    child: Image.file(
-                      _image!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
+            child: widget.isAdd
+                ? _image != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10.0),
+                        child: Image.file(
+                          _image!,
+                          fit: BoxFit.contain,
+                        ),
+                      )
+                    : const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.add, size: 50, color: Colors.grey),
+                          Text(StringConstants.stringAddFile),
+                        ],
+                      )
+                : _image != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10.0),
+                        child: Image.file(
+                          _image!,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : DocModel.base64ToImage(widget.document!.docFile),
           ),
         ),
       ),
@@ -319,7 +324,8 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
       width: double.infinity,
       child: widget.isAdd
           ? OutlinedButton(
-              onPressed: () {
+              onPressed: () async {
+                final encryptedDocImage = await DocModel.fileToBase64(_image!);
                 if (_docNameController.text.isNotEmpty &&
                     _docIdController.text.isNotEmpty &&
                     _holderNameController.text.isNotEmpty &&
@@ -330,6 +336,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                           docCategory: _selectedCategory.toString(),
                           docId: _docIdController.text,
                           holdersName: _holderNameController.text,
+                          filePath: encryptedDocImage,
                         ),
                       );
                 } else {

@@ -15,16 +15,19 @@ class AddDocument extends DocumentEvent {
   final String docCategory;
   final String docId;
   final String holdersName;
+  final String filePath;
 
   const AddDocument({
     required this.docName,
     required this.docCategory,
     required this.docId,
     required this.holdersName,
+    required this.filePath,
   });
 
   @override
-  List<Object?> get props => [docName, docCategory, docId, holdersName];
+  List<Object?> get props =>
+      [docName, docCategory, docId, holdersName, filePath];
 }
 
 class UpdateDocument extends DocumentEvent {

@@ -37,7 +37,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
           docId: event.docId,
           holdersName: event.holdersName,
           dateAdded: DateTime.now(),
-          docFile: 'path_to_file',
+          docFile: event.filePath,
         );
 
         await _dbHelper.insertDocument(doc);

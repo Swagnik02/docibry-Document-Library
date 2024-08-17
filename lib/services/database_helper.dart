@@ -36,6 +36,15 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> insertDocument(DocModel doc) async {
+    final db = await database;
+    await db.insert(
+      'documents',
+      doc.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   Future<List<DocModel>> getDocuments() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('documents');
@@ -50,15 +59,6 @@ class DatabaseHelper {
         docFile: maps[i]['docFile'],
       );
     });
-  }
-
-  Future<void> insertDocument(DocModel doc) async {
-    final db = await database;
-    await db.insert(
-      'documents',
-      doc.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
   }
 
   // db viewer

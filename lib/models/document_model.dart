@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:docibry/constants/string_constants.dart';
+import 'package:flutter/material.dart';
 
 class DocModel {
   final int uid;
@@ -38,9 +43,23 @@ class DocModel {
       docCategory: map['docCategory'],
       docId: map['docId'],
       holdersName: map['holdersName'],
-      dateAdded: DateTime.parse(map['dateAdded']),
+      dateAdded: DateTime.fromMillisecondsSinceEpoch(map['dateAdded']),
       docFile: map['docFile'],
     );
+  }
+
+  // Helper method to convert a file to a Base64 string
+  static Future<String> fileToBase64(File file) async {
+    final bytes = await file.readAsBytes();
+    return base64Encode(bytes);
+  }
+
+  // Helper method to convert a Base64 string to a file
+  static Image base64ToImage(String base64String) {
+    final decodedBytes = base64Decode(base64String);
+    log('message' + decodedBytes.toString());
+
+    return Image.memory(decodedBytes);
   }
 }
 
