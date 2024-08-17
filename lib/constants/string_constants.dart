@@ -31,10 +31,25 @@ class StringDocCategory {
 class StringConstants {
   static const String appName = 'docibry';
   static const String appFullName = 'docibry: Document Library';
+
+  // manage doc strings
   static const String stringDoc = 'Doc';
   static const String stringData = 'Data';
+
+  // add doc strings
   static const String stringAddDoc = 'Add Document';
+  static const String stringAddFile = 'Add file';
+  static const String stringEnterDocName = 'Enter Document Name';
+
+  static const String stringSelectCategory = 'Select Category';
+  static const String stringCategory = 'Category';
+  static const String stringDocumentId = 'Document ID';
+  static const String stringHoldersName = "Holder's Name";
+
+  // view doc strings
   static const String stringViewDoc = 'View Document';
   static const String stringAddDocSuccess = 'Document added successfully!';
+
+  // error
   static const String stringError = 'Error:';
 }

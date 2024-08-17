@@ -9,12 +9,13 @@ class ColorConstants {
 
   // Define a map for category colors
   static final Map<String, Color> categoryColors = {
-    'Identity': Color.fromARGB(255, 254, 67, 35), // Example: Aadhaar
+    'Identity': const Color.fromARGB(255, 254, 67, 35), // Example: Aadhaar
     'Education':
-        Color.fromRGBO(249, 215, 45, 1.0), // Example: Degree Certificate
-    'Work': Color.fromRGBO(0, 0, 0, 1.0), // Example: Offer Letter
-    'Finance': Color.fromARGB(255, 128, 128, 0), // Example: Bank Statement
-    'Travel': Color.fromRGBO(249, 243, 209, 1.0), // Example: Visa
+        const Color.fromRGBO(249, 215, 45, 1.0), // Example: Degree Certificate
+    'Work': const Color.fromRGBO(0, 0, 0, 1.0), // Example: Offer Letter
+    'Finance':
+        const Color.fromARGB(255, 128, 128, 0), // Example: Bank Statement
+    'Travel': const Color.fromRGBO(249, 243, 209, 1.0), // Example: Visa
   };
 
   // Define a map for category text colors

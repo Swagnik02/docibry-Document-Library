@@ -20,10 +20,10 @@ class ManageDocumentPage extends StatefulWidget {
   });
 
   @override
-  _ManageDocumentPageState createState() => _ManageDocumentPageState();
+  ManageDocumentPageState createState() => ManageDocumentPageState();
 }
 
-class _ManageDocumentPageState extends State<ManageDocumentPage>
+class ManageDocumentPageState extends State<ManageDocumentPage>
     with SingleTickerProviderStateMixin {
   String? _selectedCategory;
   late TabController _tabController;
@@ -66,9 +66,7 @@ class _ManageDocumentPageState extends State<ManageDocumentPage>
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: widget.isAdd
-            ? const Text(
-                StringConstants.stringAddDoc,
-              )
+            ? const Text(StringConstants.stringAddDoc)
             : const Text(StringConstants.stringViewDoc),
       ),
       body: BlocListener<DocumentBloc, DocumentState>(
@@ -84,8 +82,8 @@ class _ManageDocumentPageState extends State<ManageDocumentPage>
           } else if (state is DocumentError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content:
-                      Text('${StringConstants.stringError} ${state.error}')),
+                content: Text('${StringConstants.stringError} ${state.error}'),
+              ),
             );
           }
         },
@@ -116,21 +114,6 @@ class _ManageDocumentPageState extends State<ManageDocumentPage>
     );
   }
 
-  // Widget viewDocumentView() {
-  //   return Padding(
-  //     padding: const EdgeInsets.all(16.0),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Text('Document Name: ${_docNameController.text}'),
-  //         Text('Document ID: ${_docIdController.text}'),
-  //         Text('Holder\'s Name: ${_holderNameController.text}'),
-  //         Text('Category: ${_selectedCategory ?? 'N/A'}'),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Expanded customTabs() {
     return Expanded(
       child: CustomTabBarView(
@@ -154,14 +137,12 @@ class _ManageDocumentPageState extends State<ManageDocumentPage>
         textCapitalization: TextCapitalization.words,
         textAlign: TextAlign.center,
         decoration: const InputDecoration(
-          hintText: 'Enter Document Name',
+          hintText: StringConstants.stringEnterDocName,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(10),
-            ),
+            borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
         ),
-        readOnly: !widget.isAdd, // Disable editing in view mode
+        readOnly: !widget.isAdd,
       ),
     );
   }
@@ -185,10 +166,9 @@ class _ManageDocumentPageState extends State<ManageDocumentPage>
                   },
                   icon: const Icon(Icons.add),
                 ),
-                const Text('Add doc'),
+                const Text(StringConstants.stringAddFile),
               ] else ...[
-                const Icon(Icons.remove), // Placeholder for view mode
-                const Text('Document details'),
+                const Text('Image Placeholder'),
               ],
             ],
           ),
@@ -204,70 +184,83 @@ class _ManageDocumentPageState extends State<ManageDocumentPage>
         width: double.infinity,
         child: Card(
           elevation: 3,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (widget.isAdd) ...[
-                  DropdownButton<String>(
-                    elevation: 1,
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                    focusColor: Colors.transparent,
-                    dropdownColor:
-                        Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(10),
-                    alignment: Alignment.center,
-                    value: _selectedCategory,
-                    items:
-                        StringDocCategory.categoryList.map((String category) {
-                      return DropdownMenuItem<String>(
-                        value: category,
-                        child: Text(category),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedCategory = newValue;
-                      });
-                    },
-                    hint: const Text('Select Category'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: TextField(
-                      controller: _docIdController,
-                      decoration: const InputDecoration(
-                        labelText: "Document ID",
-                        border: OutlineInputBorder(),
+                // if (widget.isAdd) ...[
+                widget.isAdd
+                    ? DropdownButton<String>(
+                        elevation: 1,
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        focusColor: Colors.transparent,
+                        dropdownColor:
+                            Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(10),
+                        alignment: Alignment.center,
+                        value: _selectedCategory,
+                        items: StringDocCategory.categoryList
+                            .map((String category) {
+                          return DropdownMenuItem<String>(
+                            value: category,
+                            child: Text(category),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedCategory = newValue;
+                          });
+                        },
+                        hint: const Text(StringConstants.stringSelectCategory),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 50, vertical: 8.0),
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            hintText: widget.document?.docCategory,
+                            border: const OutlineInputBorder(),
+                          ),
+                          readOnly: !widget.isAdd,
+                        ),
                       ),
-                      readOnly: !widget.isAdd, // Disable editing in view mode
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: TextField(
+                    controller: _docIdController,
+                    decoration: const InputDecoration(
+                      labelText: StringConstants.stringDocumentId,
+                      border: OutlineInputBorder(),
                     ),
+                    readOnly: !widget.isAdd,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: TextField(
-                      controller: _holderNameController,
-                      decoration: const InputDecoration(
-                        labelText: "Holder's Name",
-                        border: OutlineInputBorder(),
-                      ),
-                      readOnly: !widget.isAdd, // Disable editing in view mode
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: TextField(
+                    controller: _holderNameController,
+                    decoration: const InputDecoration(
+                      labelText: StringConstants.stringHoldersName,
+                      border: OutlineInputBorder(),
                     ),
+                    readOnly: !widget.isAdd,
                   ),
-                ] else ...[
-                  // Placeholder for view mode
-                  const Text('Category:'),
-                  Text(_selectedCategory ?? 'N/A'),
-                  const Text('Document ID:'),
-                  Text(_docIdController.text),
-                  const Text('Holder\'s Name:'),
-                  Text(_holderNameController.text),
-                ],
+                ),
+
+                // ] else ...[
+
+                //   const Text('Category:'),
+                //   Text(_selectedCategory ?? 'N/A'),
+                //   const Text('Document ID:'),
+                //   Text(_docIdController.text),
+                //   const Text('Holder\'s Name:'),
+                //   Text(_holderNameController.text),
+                // ],
               ],
             ),
           ),

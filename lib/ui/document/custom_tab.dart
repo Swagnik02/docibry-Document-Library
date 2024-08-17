@@ -11,10 +11,10 @@ class CustomTabBarView extends StatefulWidget {
   });
 
   @override
-  _CustomTabBarViewState createState() => _CustomTabBarViewState();
+  CustomTabBarViewState createState() => CustomTabBarViewState();
 }
 
-class _CustomTabBarViewState extends State<CustomTabBarView>
+class CustomTabBarViewState extends State<CustomTabBarView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
