@@ -11,18 +11,7 @@ class DocCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        log('${docModel.docName} | ${docModel.holdersName}');
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ManageDocumentPage(
-              isAdd: false,
-              document: docModel,
-            ),
-          ),
-        );
-      },
+      onTap: () => _toManageDoc(context),
       child: Container(
         height: 150,
         padding: const EdgeInsets.all(16),
@@ -32,9 +21,50 @@ class DocCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(25),
         ),
         width: double.infinity,
-        child: Text(
-          docModel.docName,
-          style: Theme.of(context).textTheme.displayMedium,
+        child: Stack(children: [
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                IconButton(onPressed: () {}, icon: Icon(Icons.share)),
+                IconButton(onPressed: () {}, icon: Icon(Icons.download)),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                docModel.docCategory,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                docModel.docName,
+                style: Theme.of(context).textTheme.displayMedium,
+              ),
+              Text(
+                docModel.docId,
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+            ],
+          ),
+        ]),
+      ),
+    );
+  }
+
+  void _toManageDoc(BuildContext context) {
+    log('${docModel.docName} | ${docModel.holdersName}');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ManageDocumentPage(
+          isAdd: false,
+          document: docModel,
         ),
       ),
     );
