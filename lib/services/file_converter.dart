@@ -19,7 +19,7 @@ Future<void> saveDocToDevice(String base64String, String title) async {
   if (await Permission.manageExternalStorage.request().isGranted) {
     final file = await base64ToXfile(base64String);
     final downloadsDir = Directory('/storage/emulated/0/Download');
-    final savePath = '${downloadsDir.path}/$title';
+    final savePath = '${downloadsDir.path}/$title.jpg';
 
     await file.saveTo(savePath);
   } else {
