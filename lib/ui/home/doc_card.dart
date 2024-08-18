@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:docibry/ui/document/manage_doc.dart';
+import 'package:docibry/ui/shareDoc/share_doc_page.dart';
 import 'package:flutter/material.dart';
 import 'package:docibry/models/document_model.dart';
 
@@ -27,8 +28,21 @@ class DocCard extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                IconButton(onPressed: () {}, icon: Icon(Icons.share)),
-                IconButton(onPressed: () {}, icon: Icon(Icons.download)),
+                IconButton.filled(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ShareDocumentPage(
+                          document: docModel,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.share),
+                ),
+                IconButton.outlined(
+                    onPressed: () {}, icon: Icon(Icons.download)),
               ],
             ),
           ),
@@ -44,11 +58,11 @@ class DocCard extends StatelessWidget {
               ),
               Text(
                 docModel.docName,
-                style: Theme.of(context).textTheme.displayMedium,
+                style: Theme.of(context).textTheme.displaySmall,
               ),
               Text(
                 docModel.docId,
-                style: Theme.of(context).textTheme.headlineLarge,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
             ],
           ),

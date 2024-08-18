@@ -124,24 +124,27 @@ class HomePageState extends State<HomePage> {
   SingleChildScrollView _categoryFilters() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          DocCategoryFilterChip(
-            label: StringDocCategory.allCategory,
-            isSelected: selectedFilter == StringDocCategory.allCategory,
-            onSelected: _onCategorySelected,
-          ),
-          ...StringDocCategory.categoryList
-              .where((category) => category != StringDocCategory.allCategory)
-              .map((category) {
-            return DocCategoryFilterChip(
-              label: category,
-              isSelected: selectedFilter == category,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            DocCategoryFilterChip(
+              label: StringDocCategory.allCategory,
+              isSelected: selectedFilter == StringDocCategory.allCategory,
               onSelected: _onCategorySelected,
-            );
-          }),
-        ],
+            ),
+            ...StringDocCategory.categoryList
+                .where((category) => category != StringDocCategory.allCategory)
+                .map((category) {
+              return DocCategoryFilterChip(
+                label: category,
+                isSelected: selectedFilter == category,
+                onSelected: _onCategorySelected,
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
