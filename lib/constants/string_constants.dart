@@ -58,6 +58,8 @@ class StringConstants {
   static const String stringError = 'Error:';
   static const String stringDeleteDocSuccess =
       'Document deleted successfully !';
+  static const String stringNoDocsFound = 'No documents found';
+  static const String stringNoDataFound = 'No data available';
 
   // warnings
   static const String stringFillAll = 'Please fill all fields';

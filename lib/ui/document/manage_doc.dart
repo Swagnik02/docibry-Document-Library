@@ -208,7 +208,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                widget.isAdd
+                widget.isAdd || _isEditMode
                     ? DropdownButton<String>(
                         elevation: 1,
                         padding: const EdgeInsets.symmetric(horizontal: 30),

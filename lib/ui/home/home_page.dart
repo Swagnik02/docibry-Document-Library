@@ -1,4 +1,5 @@
 import 'package:docibry/constants/routes.dart';
+import 'package:docibry/models/document_model.dart';
 import 'package:docibry/services/db_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -76,57 +77,9 @@ class HomePageState extends State<HomePage> {
             ),
             body: Column(
               children: [
-                // Search bar
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search documents...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(25),
-                        ),
-                      ),
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                  ),
-                ),
-                // Categories Row
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      DocCategoryFilterChip(
-                        label: StringDocCategory.allCategory,
-                        isSelected:
-                            selectedFilter == StringDocCategory.allCategory,
-                        onSelected: _onCategorySelected,
-                      ),
-                      ...StringDocCategory.categoryList
-                          .where((category) =>
-                              category != StringDocCategory.allCategory)
-                          .map((category) {
-                        return DocCategoryFilterChip(
-                          label: category,
-                          isSelected: selectedFilter == category,
-                          onSelected: _onCategorySelected,
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-                // Document tiles
-                Expanded(
-                  child: filteredDocs.isEmpty
-                      ? const Center(child: Text('No documents found'))
-                      : ListView.builder(
-                          itemCount: filteredDocs.length,
-                          itemBuilder: (context, index) {
-                            return DocCard(docModel: filteredDocs[index]);
-                          },
-                        ),
-                ),
+                _searchBar(),
+                _categoryFilters(),
+                _docs(filteredDocs),
               ],
             ),
             floatingActionButton: FloatingActionButton(
@@ -142,7 +95,7 @@ class HomePageState extends State<HomePage> {
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
             ),
-            body: const Center(child: Text('No data available')),
+            body: const Center(child: Text(StringConstants.stringNoDataFound)),
             floatingActionButton: FloatingActionButton(
               onPressed: () => Navigator.pushNamed(context, addDocRoute),
               child: const Icon(Icons.add),
@@ -150,6 +103,63 @@ class HomePageState extends State<HomePage> {
           );
         }
       },
+    );
+  }
+
+  Expanded _docs(List<DocModel> filteredDocs) {
+    return Expanded(
+      child: filteredDocs.isEmpty
+          ? const Center(
+              child: Text(StringConstants.stringNoDataFound),
+            )
+          : ListView.builder(
+              itemCount: filteredDocs.length,
+              itemBuilder: (context, index) {
+                return DocCard(docModel: filteredDocs[index]);
+              },
+            ),
+    );
+  }
+
+  SingleChildScrollView _categoryFilters() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          DocCategoryFilterChip(
+            label: StringDocCategory.allCategory,
+            isSelected: selectedFilter == StringDocCategory.allCategory,
+            onSelected: _onCategorySelected,
+          ),
+          ...StringDocCategory.categoryList
+              .where((category) => category != StringDocCategory.allCategory)
+              .map((category) {
+            return DocCategoryFilterChip(
+              label: category,
+              isSelected: selectedFilter == category,
+              onSelected: _onCategorySelected,
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Padding _searchBar() {
+    return const Padding(
+      padding: EdgeInsets.all(8.0),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: 'Search documents...',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(25),
+            ),
+          ),
+          prefixIcon: Icon(Icons.search),
+        ),
+      ),
     );
   }
 }
