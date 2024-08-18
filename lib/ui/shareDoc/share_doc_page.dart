@@ -119,13 +119,18 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
 
   Card _shareTextField() {
     return Card(
-      child: Column(
-        children: [
-          TextField(
-            maxLines: 5,
-            controller: _controller,
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              maxLines: 5,
+              controller: _controller,
+              decoration: InputDecoration(
+                  border: UnderlineInputBorder(borderSide: BorderSide.none)),
+            ),
+          ],
+        ),
       ),
     );
   }
