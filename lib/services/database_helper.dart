@@ -71,6 +71,19 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> deleteDocument(int uid) async {
+    try {
+      final db = await database;
+      await db.delete(
+        'documents',
+        where: 'uid = ?',
+        whereArgs: [uid],
+      );
+    } catch (e) {
+      throw Exception('Failed to delete document: $e');
+    }
+  }
+
   // db viewer
   Future<List<String>> getTableNames() async {
     final db = await database;

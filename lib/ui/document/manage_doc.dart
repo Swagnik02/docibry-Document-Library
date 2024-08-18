@@ -71,35 +71,52 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: widget.isAdd
-            ? const Text(StringConstants.stringAddDoc)
-            : _isEditMode
-                ? const Text(StringConstants.stringEditDoc)
-                : const Text(StringConstants.stringViewDoc),
-      ),
-      body: BlocListener<DocumentBloc, DocumentState>(
-        listener: (context, state) {
-          if (state is DocumentLoaded) {
-            // Show success message
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(StringConstants.stringAddDocSuccess),
-              ),
-            );
-            // Navigate back to HomePage
-            Navigator.pop(context);
-          } else if (state is DocumentError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('${StringConstants.stringError} ${state.error}'),
-              ),
-            );
-          }
-        },
-        child: Column(
+    return BlocListener<DocumentBloc, DocumentState>(
+      listener: (context, state) {
+        // add doc
+        if (state is DocumentLoaded) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(StringConstants.stringAddDocSuccess),
+            ),
+          );
+          Navigator.pop(context);
+        }
+        // delete doc
+        else if (state is DocumentDeleted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(StringConstants.stringDeleteDocSuccess),
+            ),
+          );
+          Navigator.pop(context);
+        }
+        // error doc
+        else if (state is DocumentError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${StringConstants.stringError} ${state.error}'),
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          title: widget.isAdd
+              ? const Text(StringConstants.stringAddDoc)
+              : _isEditMode
+                  ? const Text(StringConstants.stringEditDoc)
+                  : const Text(StringConstants.stringViewDoc),
+          actions: [
+            IconButton(
+              onPressed: _handleDelete,
+              icon:
+                  widget.isAdd ? Container() : Icon(Icons.delete_outline_sharp),
+            ),
+          ],
+        ),
+        body: Column(
           children: [
             docNameTextField(
               controller: _docNameController,
@@ -111,12 +128,12 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
             submitButton(),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigator.pushNamed(context, addDocRoute);
-        },
-        child: const Icon(Icons.share),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            // Navigator.pushNamed(context, addDocRoute);
+          },
+          child: const Icon(Icons.share),
+        ),
       ),
     );
   }
@@ -321,12 +338,26 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
             : widget.document!.docFile,
       );
       if (mounted) {
-        context.read<DocumentBloc>().add(UpdateDocument(document: updatedDoc));
+        context.read<DocumentBloc>().add(
+              UpdateDocument(
+                document: updatedDoc,
+              ),
+            );
       }
     } else {
       if (mounted) {
         showSnackBar(context, StringConstants.stringFillAll);
       }
+    }
+  }
+
+  void _handleDelete() {
+    if (widget.document != null) {
+      context.read<DocumentBloc>().add(
+            DeleteDocument(
+              uid: widget.document!.uid,
+            ),
+          );
     }
   }
 

@@ -13,6 +13,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     on<FetchDocuments>(_onFetchDocuments);
     on<AddDocument>(_onAddDocument);
     on<UpdateDocument>(_onUpdateDocument);
+    on<DeleteDocument>(_onDeleteDocument); // Add this line
   }
 
   Future<void> _onFetchDocuments(
@@ -73,6 +74,26 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
       }
     } catch (e) {
       log('Error updating document: $e');
+      emit(DocumentError(error: e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteDocument(
+      DeleteDocument event, Emitter<DocumentState> emit) async {
+    try {
+      if (state is DocumentLoaded) {
+        await _dbHelper.deleteDocument(event.uid);
+
+        // Re-fetch documents and emit DocumentLoaded state
+        final documents = await _dbHelper.getDocuments();
+        emit(DocumentLoaded(documents: documents));
+
+        log('Document deleted successfully');
+      } else {
+        log('Document state is not loaded');
+      }
+    } catch (e) {
+      log('Error deleting document: $e');
       emit(DocumentError(error: e.toString()));
     }
   }

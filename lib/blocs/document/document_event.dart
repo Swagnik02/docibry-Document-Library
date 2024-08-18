@@ -40,7 +40,7 @@ class UpdateDocument extends DocumentEvent {
 }
 
 class DeleteDocument extends DocumentEvent {
-  final String uid;
+  final int uid;
 
   const DeleteDocument({required this.uid});
 

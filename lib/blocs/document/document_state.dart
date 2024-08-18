@@ -29,3 +29,10 @@ class DocumentError extends DocumentState {
   @override
   List<Object?> get props => [error];
 }
+
+class DocumentDeleted extends DocumentState {
+  const DocumentDeleted();
+
+  @override
+  List<Object?> get props => [];
+}

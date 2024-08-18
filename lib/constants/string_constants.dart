@@ -56,6 +56,8 @@ class StringConstants {
 
   // error
   static const String stringError = 'Error:';
+  static const String stringDeleteDocSuccess =
+      'Document deleted successfully !';
 
   // warnings
   static const String stringFillAll = 'Please fill all fields';

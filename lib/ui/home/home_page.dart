@@ -33,102 +33,123 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          StringConstants.appName,
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const DbViewPage(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Search bar
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search documents...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(25),
-                  ),
-                ),
-                prefixIcon: Icon(Icons.search),
-              ),
+    return BlocConsumer<DocumentBloc, DocumentState>(
+      listener: (context, state) {
+        if (state is DocumentError) {
+          // Handle error state if needed
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${state.error}'),
             ),
-          ),
-          // Categories Row
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                DocCategoryFilterChip(
-                  label: StringDocCategory.allCategory,
-                  isSelected: selectedFilter == StringDocCategory.allCategory,
-                  onSelected: _onCategorySelected,
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state is DocumentLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is DocumentLoaded) {
+          final documents = state.documents;
+          final filteredDocs = documents
+              .where((doc) =>
+                  selectedFilter == StringDocCategory.allCategory ||
+                  doc.docCategory == selectedFilter)
+              .toList();
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(
+                StringConstants.appName,
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.person),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const DbViewPage(),
+                      ),
+                    );
+                  },
                 ),
-                ...StringDocCategory.categoryList
-                    .where(
-                        (category) => category != StringDocCategory.allCategory)
-                    .map((category) {
-                  return DocCategoryFilterChip(
-                    label: category,
-                    isSelected: selectedFilter == category,
-                    onSelected: _onCategorySelected,
-                  );
-                }),
               ],
             ),
-          ),
-          // Document tiles
-          Expanded(
-            child: BlocBuilder<DocumentBloc, DocumentState>(
-              builder: (context, state) {
-                if (state is DocumentLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is DocumentLoaded) {
-                  final filteredDocs = state.documents
-                      .where((doc) =>
-                          selectedFilter == StringDocCategory.allCategory ||
-                          doc.docCategory == selectedFilter)
-                      .toList();
-
-                  if (filteredDocs.isEmpty) {
-                    return const Center(child: Text('No documents found'));
-                  }
-
-                  return ListView.builder(
-                    itemCount: filteredDocs.length,
-                    itemBuilder: (context, index) {
-                      return DocCard(docModel: filteredDocs[index]);
-                    },
-                  );
-                } else if (state is DocumentError) {
-                  return Center(child: Text('Error: ${state.error}'));
-                }
-                return const Center(child: Text('No documents available'));
-              },
+            body: Column(
+              children: [
+                // Search bar
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search documents...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(25),
+                        ),
+                      ),
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                  ),
+                ),
+                // Categories Row
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      DocCategoryFilterChip(
+                        label: StringDocCategory.allCategory,
+                        isSelected:
+                            selectedFilter == StringDocCategory.allCategory,
+                        onSelected: _onCategorySelected,
+                      ),
+                      ...StringDocCategory.categoryList
+                          .where((category) =>
+                              category != StringDocCategory.allCategory)
+                          .map((category) {
+                        return DocCategoryFilterChip(
+                          label: category,
+                          isSelected: selectedFilter == category,
+                          onSelected: _onCategorySelected,
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+                // Document tiles
+                Expanded(
+                  child: filteredDocs.isEmpty
+                      ? const Center(child: Text('No documents found'))
+                      : ListView.builder(
+                          itemCount: filteredDocs.length,
+                          itemBuilder: (context, index) {
+                            return DocCard(docModel: filteredDocs[index]);
+                          },
+                        ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, addDocRoute),
-        child: const Icon(Icons.add),
-      ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () => Navigator.pushNamed(context, addDocRoute),
+              child: const Icon(Icons.add),
+            ),
+          );
+        } else {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(
+                StringConstants.appName,
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+            ),
+            body: const Center(child: Text('No data available')),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () => Navigator.pushNamed(context, addDocRoute),
+              child: const Icon(Icons.add),
+            ),
+          );
+        }
+      },
     );
   }
 }
