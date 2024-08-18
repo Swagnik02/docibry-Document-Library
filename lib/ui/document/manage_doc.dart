@@ -1,4 +1,7 @@
+import 'dart:developer';
 import 'dart:io';
+import 'package:docibry/ui/widgets/custom_show_snackbar.dart';
+import 'package:docibry/ui/widgets/custom_text_field.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
@@ -12,13 +15,11 @@ import 'package:permission_handler/permission_handler.dart';
 
 class ManageDocumentPage extends StatefulWidget {
   final bool isAdd;
-  // final bool isView;
   final DocModel? document;
 
   const ManageDocumentPage({
     super.key,
     required this.isAdd,
-    // required this.isView,
     this.document,
   });
 
@@ -29,7 +30,6 @@ class ManageDocumentPage extends StatefulWidget {
 class ManageDocumentPageState extends State<ManageDocumentPage>
     with SingleTickerProviderStateMixin {
   File? _image;
-
   final ImagePicker _picker = ImagePicker();
 
   String? _selectedCategory;
@@ -82,7 +82,8 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
             // Show success message
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                  content: Text(StringConstants.stringAddDocSuccess)),
+                content: Text(StringConstants.stringAddDocSuccess),
+              ),
             );
             // Navigate back to HomePage
             Navigator.pop(context);
@@ -96,9 +97,13 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         },
         child: Column(
           children: [
-            docNameTextField(),
+            docNameTextField(
+              controller: _docNameController,
+              hintText: StringConstants.stringEnterDocName,
+              isAdd: widget.isAdd,
+            ),
             customTabs(),
-            submitButton(context),
+            submitButton(),
           ],
         ),
       ),
@@ -108,16 +113,6 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         },
         child: const Icon(Icons.share),
       ),
-    );
-  }
-
-  Widget addDocumentView() {
-    return Column(
-      children: [
-        docNameTextField(),
-        customTabs(),
-        submitButton(context),
-      ],
     );
   }
 
@@ -134,52 +129,6 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         ],
       ),
     );
-  }
-
-  Padding docNameTextField() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 16),
-      child: TextField(
-        controller: _docNameController,
-        textCapitalization: TextCapitalization.words,
-        textAlign: TextAlign.center,
-        decoration: const InputDecoration(
-          hintText: StringConstants.stringEnterDocName,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-        ),
-        readOnly: !widget.isAdd,
-      ),
-    );
-  }
-
-  // imagepicking fn
-  Future<void> _pickImage() async {
-    var status = await Permission.photos.status;
-
-    if (!status.isGranted) {
-      status = await Permission.photos.request();
-    }
-
-    if (status.isGranted) {
-      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-      setState(() {
-        if (pickedFile != null) {
-          _image = File(pickedFile.path);
-        } else {
-          print('No image selected.');
-        }
-      });
-    } else {
-      // Permission denied
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Permission denied. Please enable permissions from settings.'),
-        ),
-      );
-    }
   }
 
   Widget tab1() {
@@ -226,15 +175,15 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         width: double.infinity,
         child: Card(
           elevation: 3,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // if (widget.isAdd) ...[
                 widget.isAdd
                     ? DropdownButton<String>(
                         elevation: 1,
@@ -268,41 +217,19 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                             hintText: widget.document?.docCategory,
                             border: const OutlineInputBorder(),
                           ),
-                          readOnly: !widget.isAdd,
+                          readOnly: true,
                         ),
                       ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: TextField(
-                    controller: _docIdController,
-                    decoration: const InputDecoration(
-                      labelText: StringConstants.stringDocumentId,
-                      border: OutlineInputBorder(),
-                    ),
-                    readOnly: !widget.isAdd,
-                  ),
+                buildTextField(
+                  controller: _docIdController,
+                  labelText: StringConstants.stringDocumentId,
+                  isAdd: widget.isAdd,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: TextField(
-                    controller: _holderNameController,
-                    decoration: const InputDecoration(
-                      labelText: StringConstants.stringHoldersName,
-                      border: OutlineInputBorder(),
-                    ),
-                    readOnly: !widget.isAdd,
-                  ),
+                buildTextField(
+                  controller: _holderNameController,
+                  labelText: StringConstants.stringHoldersName,
+                  isAdd: widget.isAdd,
                 ),
-
-                // ] else ...[
-
-                //   const Text('Category:'),
-                //   Text(_selectedCategory ?? 'N/A'),
-                //   const Text('Document ID:'),
-                //   Text(_docIdController.text),
-                //   const Text('Holder\'s Name:'),
-                //   Text(_holderNameController.text),
-                // ],
               ],
             ),
           ),
@@ -311,40 +238,65 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     );
   }
 
-  Container submitButton(BuildContext context) {
+  Container submitButton() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
       padding: const EdgeInsets.all(20),
       width: double.infinity,
-      child: widget.isAdd
-          ? OutlinedButton(
-              onPressed: () async {
-                final encryptedDocImage = await DocModel.fileToBase64(_image!);
-                if (_docNameController.text.isNotEmpty &&
-                    _docIdController.text.isNotEmpty &&
-                    _holderNameController.text.isNotEmpty &&
-                    _selectedCategory != null) {
-                  context.read<DocumentBloc>().add(
-                        AddDocument(
-                          docName: _docNameController.text,
-                          docCategory: _selectedCategory.toString(),
-                          docId: _docIdController.text,
-                          holdersName: _holderNameController.text,
-                          filePath: encryptedDocImage,
-                        ),
-                      );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all fields')),
-                  );
-                }
-              },
-              child: const Text('SUBMIT'),
-            )
-          : OutlinedButton(
-              onPressed: () {},
-              child: const Text('UPDATE'),
-            ),
+      child: OutlinedButton(
+        onPressed: widget.isAdd ? _handleSubmit : _handleUpdate,
+        child: Text(
+          widget.isAdd
+              ? StringConstants.stringSubmit
+              : StringConstants.stringUpdate,
+        ),
+      ),
     );
+  }
+
+  Future<void> _handleSubmit() async {
+    if (_docNameController.text.isNotEmpty &&
+        _docIdController.text.isNotEmpty &&
+        _holderNameController.text.isNotEmpty &&
+        _selectedCategory != null &&
+        _image != null) {
+      final encryptedDocImage = await DocModel.fileToBase64(_image!);
+      context.read<DocumentBloc>().add(
+            AddDocument(
+              docName: _docNameController.text,
+              docCategory: _selectedCategory!,
+              docId: _docIdController.text,
+              holdersName: _holderNameController.text,
+              filePath: encryptedDocImage,
+            ),
+          );
+    } else {
+      showSnackBar(context, StringConstants.stringFillAll);
+    }
+  }
+
+  void _handleUpdate() {
+    // Implement update logic here
+  }
+
+  Future<void> _pickImage() async {
+    var status = await Permission.photos.status;
+
+    if (!status.isGranted) {
+      status = await Permission.photos.request();
+    }
+
+    if (status.isGranted) {
+      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      setState(() {
+        if (pickedFile != null) {
+          _image = File(pickedFile.path);
+        } else {
+          log(StringConstants.stringNoImageSelected);
+        }
+      });
+    } else {
+      showSnackBar(context, StringConstants.stringPermsDenied);
+    }
   }
 }

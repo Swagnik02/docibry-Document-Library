@@ -12,21 +12,12 @@ class DocCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        log(docModel.toMap().toString());
-        // Navigator.pushNamed(
-        //   context,
-        //   '/viewDocument',
-        //   arguments: {
-        //     'document': docModel,
-        //   },
-        // );
-
+        log('${docModel.docName} | ${docModel.holdersName}');
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ManageDocumentPage(
               isAdd: false,
-              // isView: true,
               document: docModel,
             ),
           ),
@@ -43,7 +34,7 @@ class DocCard extends StatelessWidget {
         width: double.infinity,
         child: Text(
           docModel.docName,
-          style: const TextStyle(color: Colors.black, fontSize: 30),
+          style: Theme.of(context).textTheme.displayMedium,
         ),
       ),
     );

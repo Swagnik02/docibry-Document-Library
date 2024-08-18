@@ -52,4 +52,14 @@ class StringConstants {
 
   // error
   static const String stringError = 'Error:';
+
+  // warnings
+  static const String stringFillAll = 'Please fill all fields';
+  static const String stringNoImageSelected = 'No image selected.';
+  static const String stringPermsDenied =
+      'Permission denied. Please enable permissions from settings.';
+
+  // others
+  static const String stringSubmit = 'SUBMIT:';
+  static const String stringUpdate = 'UPDATE:';
 }

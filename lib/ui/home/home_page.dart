@@ -17,11 +17,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String selectedCategory = StringDocCategory.allCategory; // Default to 'All'
+  String selectedFilter = StringDocCategory.allCategory;
 
   void _onCategorySelected(String category) {
     setState(() {
-      selectedCategory = category;
+      selectedFilter = category;
     });
   }
 
@@ -35,9 +35,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           StringConstants.appName,
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.w400),
+          style: Theme.of(context).textTheme.headlineLarge,
         ),
         actions: [
           IconButton(
@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 DocCategoryFilterChip(
                   label: StringDocCategory.allCategory,
-                  isSelected: selectedCategory == StringDocCategory.allCategory,
+                  isSelected: selectedFilter == StringDocCategory.allCategory,
                   onSelected: _onCategorySelected,
                 ),
                 ...StringDocCategory.categoryList
@@ -86,7 +86,7 @@ class _HomePageState extends State<HomePage> {
                     .map((category) {
                   return DocCategoryFilterChip(
                     label: category,
-                    isSelected: selectedCategory == category,
+                    isSelected: selectedFilter == category,
                     onSelected: _onCategorySelected,
                   );
                 }).toList(),
@@ -102,8 +102,8 @@ class _HomePageState extends State<HomePage> {
                 } else if (state is DocumentLoaded) {
                   final filteredDocs = state.documents
                       .where((doc) =>
-                          selectedCategory == StringDocCategory.allCategory ||
-                          doc.docCategory == selectedCategory)
+                          selectedFilter == StringDocCategory.allCategory ||
+                          doc.docCategory == selectedFilter)
                       .toList();
 
                   if (filteredDocs.isEmpty) {

@@ -57,7 +57,7 @@ class DocModel {
   // Helper method to convert a Base64 string to a file
   static Image base64ToImage(String base64String) {
     final decodedBytes = base64Decode(base64String);
-    log('message' + decodedBytes.toString());
+    // log('message' + decodedBytes.toString());
 
     return Image.memory(decodedBytes);
   }
