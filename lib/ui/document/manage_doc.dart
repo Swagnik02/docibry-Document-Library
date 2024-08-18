@@ -225,13 +225,11 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                             child: Text(category),
                           );
                         }).toList(),
-                        onChanged: _isEditMode
-                            ? (String? newValue) {
-                                setState(() {
-                                  _selectedCategory = newValue;
-                                });
-                              }
-                            : null,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedCategory = newValue;
+                          });
+                        },
                         hint: const Text(StringConstants.stringSelectCategory),
                       )
                     : Padding(
