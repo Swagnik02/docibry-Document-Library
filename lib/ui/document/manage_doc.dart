@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:docibry/ui/shareDoc/share_doc_page.dart';
 import 'package:docibry/ui/widgets/custom_show_snackbar.dart';
 import 'package:docibry/ui/widgets/custom_text_field.dart';
 import 'package:image_picker/image_picker.dart';
@@ -130,7 +131,14 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            // Navigator.pushNamed(context, addDocRoute);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ShareDocumentPage(
+                  document: widget.document,
+                ),
+              ),
+            );
           },
           child: const Icon(Icons.share),
         ),

@@ -2,6 +2,7 @@ import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/constants/routes.dart';
 import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/services/database_helper.dart';
+import 'package:docibry/ui/shareDoc/share_doc_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'blocs/document/document_bloc.dart';
@@ -32,6 +33,7 @@ class DocibryApp extends StatelessWidget {
           homeRoute: (context) => const HomePage(),
           addDocRoute: (context) => const ManageDocumentPage(isAdd: true),
           viewDocRoute: (context) => const ManageDocumentPage(isAdd: false),
+          shareDocRoute: (context) => const ShareDocumentPage(),
         },
       ),
     );

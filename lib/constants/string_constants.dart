@@ -71,4 +71,7 @@ class StringConstants {
   static const String stringSubmit = 'SUBMIT';
   static const String stringUpdate = 'UPDATE';
   static const String stringEdit = 'EDIT';
+
+  // Share doc
+  static const String stringShareDoc = 'Share Document';
 }
