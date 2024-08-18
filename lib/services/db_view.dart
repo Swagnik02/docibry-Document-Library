@@ -2,11 +2,13 @@ import 'package:docibry/services/database_helper.dart';
 import 'package:flutter/material.dart';
 
 class DbViewPage extends StatefulWidget {
+  const DbViewPage({super.key});
+
   @override
-  _DbViewPageState createState() => _DbViewPageState();
+  DbViewPageState createState() => DbViewPageState();
 }
 
-class _DbViewPageState extends State<DbViewPage> {
+class DbViewPageState extends State<DbViewPage> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   late Future<List<String>> _tableNames;
 
@@ -20,17 +22,17 @@ class _DbViewPageState extends State<DbViewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Database Viewer'),
+        title: const Text('Database Viewer'),
       ),
       body: FutureBuilder<List<String>>(
         future: _tableNames,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No tables found.'));
+            return const Center(child: Text('No tables found.'));
           } else {
             final tables = snapshot.data!;
 
@@ -65,13 +67,14 @@ class TableDataPage extends StatefulWidget {
   final String tableName;
   final DatabaseHelper dbHelper;
 
-  TableDataPage({required this.tableName, required this.dbHelper});
+  const TableDataPage(
+      {super.key, required this.tableName, required this.dbHelper});
 
   @override
-  _TableDataPageState createState() => _TableDataPageState();
+  TableDataPageState createState() => TableDataPageState();
 }
 
-class _TableDataPageState extends State<TableDataPage> {
+class TableDataPageState extends State<TableDataPage> {
   late Future<List<Map<String, dynamic>>> _tableData;
 
   @override
@@ -90,11 +93,11 @@ class _TableDataPageState extends State<TableDataPage> {
         future: _tableData,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No data found.'));
+            return const Center(child: Text('No data found.'));
           } else {
             final data = snapshot.data!;
 

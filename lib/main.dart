@@ -11,11 +11,11 @@ import 'ui/document/manage_doc.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseHelper().getDocuments();
-  runApp(MyApp());
+  runApp(const DocibryApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class DocibryApp extends StatelessWidget {
+  const DocibryApp({super.key});
 
   @override
   Widget build(BuildContext context) {

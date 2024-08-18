@@ -13,10 +13,10 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   String selectedFilter = StringDocCategory.allCategory;
 
   void _onCategorySelected(String category) {
@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => DbViewPage(),
+                  builder: (context) => const DbViewPage(),
                 ),
               );
             },
@@ -89,7 +89,7 @@ class _HomePageState extends State<HomePage> {
                     isSelected: selectedFilter == category,
                     onSelected: _onCategorySelected,
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
