@@ -61,6 +61,16 @@ class DatabaseHelper {
     });
   }
 
+  Future<void> updateDocument(DocModel doc) async {
+    final db = await database;
+    await db.update(
+      'documents',
+      doc.toMap(),
+      where: 'uid = ?',
+      whereArgs: [doc.uid],
+    );
+  }
+
   // db viewer
   Future<List<String>> getTableNames() async {
     final db = await database;

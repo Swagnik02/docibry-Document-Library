@@ -29,6 +29,7 @@ class ManageDocumentPage extends StatefulWidget {
 
 class ManageDocumentPageState extends State<ManageDocumentPage>
     with SingleTickerProviderStateMixin {
+  late bool _isEditMode;
   File? _image;
   final ImagePicker _picker = ImagePicker();
 
@@ -48,6 +49,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     _docNameController = TextEditingController();
     _docIdController = TextEditingController();
     _holderNameController = TextEditingController();
+    _isEditMode = false;
 
     if (!widget.isAdd && widget.document != null) {
       // Initialize fields with document data if in view mode
@@ -74,7 +76,9 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
       appBar: AppBar(
         title: widget.isAdd
             ? const Text(StringConstants.stringAddDoc)
-            : const Text(StringConstants.stringViewDoc),
+            : _isEditMode
+                ? const Text(StringConstants.stringEditDoc)
+                : const Text(StringConstants.stringViewDoc),
       ),
       body: BlocListener<DocumentBloc, DocumentState>(
         listener: (context, state) {
@@ -101,6 +105,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
               controller: _docNameController,
               hintText: StringConstants.stringEnterDocName,
               isAdd: widget.isAdd,
+              isEditMode: _isEditMode,
             ),
             customTabs(),
             submitButton(),
@@ -157,7 +162,9 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         width: double.infinity,
         child: GestureDetector(
           onTap: () async {
-            _pickImage();
+            if (_isEditMode || widget.isAdd) {
+              _pickImage();
+            }
           },
           child: Card(
             elevation: 3,
@@ -201,11 +208,13 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                             child: Text(category),
                           );
                         }).toList(),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _selectedCategory = newValue;
-                          });
-                        },
+                        onChanged: _isEditMode
+                            ? (String? newValue) {
+                                setState(() {
+                                  _selectedCategory = newValue;
+                                });
+                              }
+                            : null,
                         hint: const Text(StringConstants.stringSelectCategory),
                       )
                     : Padding(
@@ -224,11 +233,13 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                   controller: _docIdController,
                   labelText: StringConstants.stringDocumentId,
                   isAdd: widget.isAdd,
+                  isEditMode: _isEditMode,
                 ),
                 buildTextField(
                   controller: _holderNameController,
                   labelText: StringConstants.stringHoldersName,
                   isAdd: widget.isAdd,
+                  isEditMode: _isEditMode,
                 ),
               ],
             ),
@@ -244,11 +255,17 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
       padding: const EdgeInsets.all(20),
       width: double.infinity,
       child: OutlinedButton(
-        onPressed: widget.isAdd ? _handleSubmit : _handleUpdate,
+        onPressed: widget.isAdd
+            ? _handleSubmit
+            : _isEditMode
+                ? _handleUpdate
+                : _handleEdit,
         child: Text(
           widget.isAdd
               ? StringConstants.stringSubmit
-              : StringConstants.stringUpdate,
+              : _isEditMode
+                  ? StringConstants.stringUpdate
+                  : StringConstants.stringEdit,
         ),
       ),
     );
@@ -280,8 +297,37 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     }
   }
 
-  void _handleUpdate() {
-    // Implement update logic here
+  void _handleEdit() {
+    setState(() {
+      _isEditMode = !_isEditMode;
+    });
+    showSnackBar(context, StringConstants.stringEditModeEnabled);
+  }
+
+  void _handleUpdate() async {
+    if (_docNameController.text.isNotEmpty &&
+        _docIdController.text.isNotEmpty &&
+        _holderNameController.text.isNotEmpty &&
+        _selectedCategory != null) {
+      final updatedDoc = DocModel(
+        uid: widget.document!.uid,
+        docName: _docNameController.text,
+        docCategory: _selectedCategory!,
+        docId: _docIdController.text,
+        holdersName: _holderNameController.text,
+        dateAdded: widget.document!.dateAdded,
+        docFile: _image != null
+            ? await DocModel.fileToBase64(_image!)
+            : widget.document!.docFile,
+      );
+      if (mounted) {
+        context.read<DocumentBloc>().add(UpdateDocument(document: updatedDoc));
+      }
+    } else {
+      if (mounted) {
+        showSnackBar(context, StringConstants.stringFillAll);
+      }
+    }
   }
 
   Future<void> _pickImage() async {

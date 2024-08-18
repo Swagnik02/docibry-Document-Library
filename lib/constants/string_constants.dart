@@ -50,6 +50,10 @@ class StringConstants {
   static const String stringViewDoc = 'View Document';
   static const String stringAddDocSuccess = 'Document added successfully!';
 
+  // Edit doc strings
+  static const String stringEditDoc = 'Edit Document';
+  static const String stringEditModeEnabled = 'Edit Mode Enabled';
+
   // error
   static const String stringError = 'Error:';
 
@@ -60,6 +64,7 @@ class StringConstants {
       'Permission denied. Please enable permissions from settings.';
 
   // others
-  static const String stringSubmit = 'SUBMIT:';
-  static const String stringUpdate = 'UPDATE:';
+  static const String stringSubmit = 'SUBMIT';
+  static const String stringUpdate = 'UPDATE';
+  static const String stringEdit = 'EDIT';
 }

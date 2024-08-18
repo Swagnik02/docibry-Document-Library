@@ -12,6 +12,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   DocumentBloc() : super(DocumentInitial()) {
     on<FetchDocuments>(_onFetchDocuments);
     on<AddDocument>(_onAddDocument);
+    on<UpdateDocument>(_onUpdateDocument);
   }
 
   Future<void> _onFetchDocuments(
@@ -55,5 +56,24 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     }
   }
 
-  // Add other event handlers (e.g., UpdateDocument, DeleteDocument) as needed
+  Future<void> _onUpdateDocument(
+      UpdateDocument event, Emitter<DocumentState> emit) async {
+    try {
+      if (state is DocumentLoaded) {
+        final doc = event.document;
+
+        await _dbHelper.updateDocument(doc);
+
+        final documents = await _dbHelper.getDocuments();
+        emit(DocumentLoaded(documents: documents));
+
+        log('Document updated successfully');
+      } else {
+        log('Document state is not loaded');
+      }
+    } catch (e) {
+      log('Error updating document: $e');
+      emit(DocumentError(error: e.toString()));
+    }
+  }
 }
