@@ -183,6 +183,24 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
   }
 
   Widget tab1() {
+    final Widget imageWidget = _image != null
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(10.0),
+            child: Image.file(
+              _image!,
+              fit: BoxFit.contain,
+            ),
+          )
+        : widget.isAdd
+            ? const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add, size: 50, color: Colors.grey),
+                  Text(StringConstants.stringAddFile),
+                ],
+              )
+            : DocModel.base64ToImage(widget.document!.docFile);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: SizedBox(
@@ -194,31 +212,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
           },
           child: Card(
             elevation: 3,
-            child: widget.isAdd
-                ? _image != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(10.0),
-                        child: Image.file(
-                          _image!,
-                          fit: BoxFit.contain,
-                        ),
-                      )
-                    : const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add, size: 50, color: Colors.grey),
-                          Text(StringConstants.stringAddFile),
-                        ],
-                      )
-                : _image != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(10.0),
-                        child: Image.file(
-                          _image!,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : DocModel.base64ToImage(widget.document!.docFile),
+            child: imageWidget,
           ),
         ),
       ),
