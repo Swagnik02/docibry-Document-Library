@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/constants/string_constants.dart';
@@ -54,35 +53,66 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
             children: [
               _imageDisplay(context),
               _shareTextField(),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 100.0, vertical: 16),
-                child: OutlinedButton(
-                  onPressed: () async {
-                    try {
-                      final imageFile =
-                          await base64ToXfile(widget.document!.docFile);
-                      _shareDoc(imageFile, _controller.text);
-                    } catch (e) {
-                      log(e.toString());
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error sharing document: $e')),
-                      );
-                    }
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Share'),
-                      SizedBox(width: 16),
-                      Icon(Icons.share),
-                    ],
-                  ),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _shareButton(context),
+                  _saveToDeviceButton(context),
+                ],
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _shareButton(BuildContext context) {
+    return OutlinedButton(
+      onPressed: () async {
+        try {
+          _shareDoc(widget.document!.docFile, _controller.text);
+        } catch (e) {
+          log(e.toString());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error sharing document: $e')),
+          );
+        }
+      },
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Share'),
+          SizedBox(width: 16),
+          Icon(Icons.share),
+        ],
+      ),
+    );
+  }
+
+  Widget _saveToDeviceButton(BuildContext context) {
+    return OutlinedButton(
+      onPressed: () async {
+        try {
+          await saveDocToDevice(
+              widget.document!.docFile, widget.document!.docId);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Document saved to Downloads')),
+          );
+        } catch (e) {
+          log(e.toString());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error saving document: $e')),
+          );
+        }
+      },
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Save To Device'),
+          SizedBox(width: 16),
+          Icon(Icons.file_download_outlined),
+        ],
       ),
     );
   }
@@ -114,8 +144,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     );
   }
 
-  void _shareDoc(XFile docFile, String shareText) {
-    Share.shareXFiles([docFile], text: shareText);
-    // Share.share(shareText);
+  void _shareDoc(String imageFile, String shareText) async {
+    Share.shareXFiles([await base64ToXfile(imageFile)], text: shareText);
   }
 }

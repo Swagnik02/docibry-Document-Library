@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:docibry/services/file_converter.dart';
 import 'package:docibry/ui/document/manage_doc.dart';
 import 'package:docibry/ui/shareDoc/share_doc_page.dart';
 import 'package:flutter/material.dart';
@@ -39,10 +40,25 @@ class DocCard extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: Icon(Icons.share),
+                  icon: const Icon(Icons.share),
                 ),
                 IconButton.outlined(
-                    onPressed: () {}, icon: Icon(Icons.download)),
+                  onPressed: () async {
+                    try {
+                      await saveDocToDevice(docModel.docFile, docModel.docId);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Document saved to Downloads')),
+                      );
+                    } catch (e) {
+                      log(e.toString());
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error saving document: $e')),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.file_download_outlined),
+                ),
               ],
             ),
           ),
