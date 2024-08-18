@@ -261,17 +261,22 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         _selectedCategory != null &&
         _image != null) {
       final encryptedDocImage = await DocModel.fileToBase64(_image!);
-      context.read<DocumentBloc>().add(
-            AddDocument(
-              docName: _docNameController.text,
-              docCategory: _selectedCategory!,
-              docId: _docIdController.text,
-              holdersName: _holderNameController.text,
-              filePath: encryptedDocImage,
-            ),
-          );
+
+      if (mounted) {
+        context.read<DocumentBloc>().add(
+              AddDocument(
+                docName: _docNameController.text,
+                docCategory: _selectedCategory!,
+                docId: _docIdController.text,
+                holdersName: _holderNameController.text,
+                filePath: encryptedDocImage,
+              ),
+            );
+      }
     } else {
-      showSnackBar(context, StringConstants.stringFillAll);
+      if (mounted) {
+        showSnackBar(context, StringConstants.stringFillAll);
+      }
     }
   }
 
@@ -288,15 +293,19 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
 
     if (status.isGranted) {
       final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-      setState(() {
-        if (pickedFile != null) {
-          _image = File(pickedFile.path);
-        } else {
-          log(StringConstants.stringNoImageSelected);
-        }
-      });
+      if (mounted) {
+        setState(() {
+          if (pickedFile != null) {
+            _image = File(pickedFile.path);
+          } else {
+            log(StringConstants.stringNoImageSelected);
+          }
+        });
+      }
     } else {
-      showSnackBar(context, StringConstants.stringPermsDenied);
+      if (mounted) {
+        showSnackBar(context, StringConstants.stringPermsDenied);
+      }
     }
   }
 }
