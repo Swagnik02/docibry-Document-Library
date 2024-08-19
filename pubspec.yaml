@@ -27,6 +27,7 @@ dependencies:
   pdf: ^3.11.1
   pdfx: ^2.6.0 # dependable to device_info_plus: ^9.0.0
   device_info_plus: ^10.1.2
+  dots_indicator: ^3.0.0
 
 dependency_overrides:
   device_info_plus: ^9.0.0
