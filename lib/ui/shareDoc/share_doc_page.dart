@@ -56,7 +56,14 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _shareButton(context),
+                  _btnShareAsImg(context),
+                  _saveToDeviceButton(context),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _btnShareAsPdf(context),
                   _saveToDeviceButton(context),
                 ],
               ),
@@ -67,11 +74,34 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     );
   }
 
-  Widget _shareButton(BuildContext context) {
+  Widget _btnShareAsImg(BuildContext context) {
     return OutlinedButton(
       onPressed: () async {
         try {
-          _shareDoc(widget.document!.docFile, _controller.text);
+          _shareAsImage(widget.document!.docFile, _controller.text);
+        } catch (e) {
+          log(e.toString());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error sharing document: $e')),
+          );
+        }
+      },
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Share'),
+          SizedBox(width: 16),
+          Icon(Icons.share),
+        ],
+      ),
+    );
+  }
+
+  Widget _btnShareAsPdf(BuildContext context) {
+    return OutlinedButton(
+      onPressed: () async {
+        try {
+          _shareAsPdf(widget.document!.docFile, _controller.text);
         } catch (e) {
           log(e.toString());
           ScaffoldMessenger.of(context).showSnackBar(
@@ -149,7 +179,12 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     );
   }
 
-  void _shareDoc(String imageFile, String shareText) async {
+  void _shareAsImage(String imageFile, String shareText) async {
     Share.shareXFiles([await base64ToXfile(imageFile)], text: shareText);
+  }
+
+  void _shareAsPdf(String imageFile, String shareText) async {
+    Share.shareXFiles([await base64ToPdf(imageFile, widget.document!.docId)],
+        text: shareText);
   }
 }

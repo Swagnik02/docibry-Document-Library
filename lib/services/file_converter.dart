@@ -17,6 +17,16 @@ Future<XFile> base64ToXfile(String base64String) async {
   return XFile(filePath);
 }
 
+Future<XFile> base64ToPdf(String base64String, String fileName) async {
+  final decodedBytes = base64Decode(base64String);
+  final directory = await getTemporaryDirectory();
+  final filePath = '${directory.path}/$fileName.pdf';
+  final file = File(filePath);
+
+  await file.writeAsBytes(decodedBytes);
+  return XFile(filePath);
+}
+
 Future<void> saveDocToDevice(String base64String, String title) async {
   if (await Permission.manageExternalStorage.request().isGranted) {
     final file = await base64ToXfile(base64String);
