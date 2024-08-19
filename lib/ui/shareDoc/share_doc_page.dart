@@ -57,14 +57,14 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _btnShareAsImg(context),
-                  _saveToDeviceButton(context),
+                  _btnSaveToDeviceJpg(context),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _btnShareAsPdf(context),
-                  _saveToDeviceButton(context),
+                  _btnSaveToDevicePdf(context),
                 ],
               ),
             ],
@@ -120,11 +120,38 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     );
   }
 
-  Widget _saveToDeviceButton(BuildContext context) {
+  Widget _btnSaveToDeviceJpg(BuildContext context) {
     return OutlinedButton(
       onPressed: () async {
         try {
           await saveToDeviceJpg(
+              widget.document!.docFile, widget.document!.docId);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Document saved to Downloads')),
+          );
+        } catch (e) {
+          log(e.toString());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error saving document: $e')),
+          );
+        }
+      },
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Save To Device'),
+          SizedBox(width: 16),
+          Icon(Icons.file_download_outlined),
+        ],
+      ),
+    );
+  }
+
+  Widget _btnSaveToDevicePdf(BuildContext context) {
+    return OutlinedButton(
+      onPressed: () async {
+        try {
+          await saveToDevicePdf(
               widget.document!.docFile, widget.document!.docId);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Document saved to Downloads')),

@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart' show XFile;
 import 'package:pdfx/pdfx.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 Future<XFile> base64ToXfile(String base64String) async {
   final decodedBytes = base64Decode(base64String);
@@ -21,9 +22,19 @@ Future<XFile> base64ToPdf(String base64String, String fileName) async {
   final decodedBytes = base64Decode(base64String);
   final directory = await getTemporaryDirectory();
   final filePath = '${directory.path}/$fileName.pdf';
-  final file = File(filePath);
+  final pdf = pw.Document();
 
-  await file.writeAsBytes(decodedBytes);
+  final pdfImage = pw.MemoryImage(decodedBytes);
+
+  pdf.addPage(
+    pw.Page(
+      build: (pw.Context context) => pw.Image(pdfImage),
+    ),
+  );
+
+  final file = File(filePath);
+  await file.writeAsBytes(await pdf.save());
+
   return XFile(filePath);
 }
 
@@ -34,6 +45,18 @@ Future<void> saveToDeviceJpg(String base64String, String title) async {
     final savePath = '${downloadsDir.path}/$title.jpg';
 
     await file.saveTo(savePath);
+  } else {
+    throw Exception('Permission to access storage was denied');
+  }
+}
+
+Future<void> saveToDevicePdf(String base64String, String title) async {
+  if (await Permission.manageExternalStorage.request().isGranted) {
+    final pdfFile = await base64ToPdf(base64String, title);
+    final downloadsDir = Directory('/storage/emulated/0/Download');
+    final savePath = '${downloadsDir.path}/$title.pdf';
+
+    await pdfFile.saveTo(savePath);
   } else {
     throw Exception('Permission to access storage was denied');
   }
