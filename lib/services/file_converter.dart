@@ -27,7 +27,7 @@ Future<XFile> base64ToPdf(String base64String, String fileName) async {
   return XFile(filePath);
 }
 
-Future<void> saveDocToDevice(String base64String, String title) async {
+Future<void> saveToDeviceJpg(String base64String, String title) async {
   if (await Permission.manageExternalStorage.request().isGranted) {
     final file = await base64ToXfile(base64String);
     final downloadsDir = Directory('/storage/emulated/0/Download');

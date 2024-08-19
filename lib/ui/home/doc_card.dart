@@ -45,7 +45,7 @@ class DocCard extends StatelessWidget {
                 IconButton.outlined(
                   onPressed: () async {
                     try {
-                      await saveDocToDevice(docModel.docFile, docModel.docId);
+                      await saveToDeviceJpg(docModel.docFile, docModel.docId);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content: Text('Document saved to Downloads')),

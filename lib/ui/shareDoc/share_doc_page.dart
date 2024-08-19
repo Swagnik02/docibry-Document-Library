@@ -124,7 +124,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     return OutlinedButton(
       onPressed: () async {
         try {
-          await saveDocToDevice(
+          await saveToDeviceJpg(
               widget.document!.docFile, widget.document!.docId);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Document saved to Downloads')),
