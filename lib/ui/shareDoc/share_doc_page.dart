@@ -54,16 +54,20 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
               _imageDisplay(context),
               _shareTextField(),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  const Text('Share as '),
+                  const Icon(Icons.share_outlined),
                   _btnShareAsImg(context),
-                  _btnSaveToDeviceJpg(context),
+                  _btnShareAsPdf(context),
                 ],
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _btnShareAsPdf(context),
+                  const Text('Save to device as '),
+                  const Icon(Icons.save_alt_rounded),
+                  _btnSaveToDeviceJpg(context),
                   _btnSaveToDevicePdf(context),
                 ],
               ),
@@ -75,7 +79,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
   }
 
   Widget _btnShareAsImg(BuildContext context) {
-    return OutlinedButton(
+    return IconButton.outlined(
       onPressed: () async {
         try {
           _shareAsImage(widget.document!.docFile, _controller.text);
@@ -86,19 +90,12 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
           );
         }
       },
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('Share'),
-          SizedBox(width: 16),
-          Icon(Icons.share),
-        ],
-      ),
+      icon: const Icon(Icons.image),
     );
   }
 
   Widget _btnShareAsPdf(BuildContext context) {
-    return OutlinedButton(
+    return IconButton.outlined(
       onPressed: () async {
         try {
           _shareAsPdf(widget.document!.docFile, _controller.text);
@@ -109,19 +106,12 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
           );
         }
       },
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('Share'),
-          SizedBox(width: 16),
-          Icon(Icons.share),
-        ],
-      ),
+      icon: const Icon(Icons.picture_as_pdf_rounded),
     );
   }
 
   Widget _btnSaveToDeviceJpg(BuildContext context) {
-    return OutlinedButton(
+    return IconButton.outlined(
       onPressed: () async {
         try {
           await saveToDeviceJpg(
@@ -136,19 +126,12 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
           );
         }
       },
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('Save To Device'),
-          SizedBox(width: 16),
-          Icon(Icons.file_download_outlined),
-        ],
-      ),
+      icon: const Icon(Icons.image),
     );
   }
 
   Widget _btnSaveToDevicePdf(BuildContext context) {
-    return OutlinedButton(
+    return IconButton.outlined(
       onPressed: () async {
         try {
           await saveToDevicePdf(
@@ -163,14 +146,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
           );
         }
       },
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('Save To Device'),
-          SizedBox(width: 16),
-          Icon(Icons.file_download_outlined),
-        ],
-      ),
+      icon: const Icon(Icons.picture_as_pdf_rounded),
     );
   }
 
@@ -183,7 +159,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
             TextField(
               maxLines: 5,
               controller: _controller,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                   border: UnderlineInputBorder(borderSide: BorderSide.none)),
             ),
           ],
