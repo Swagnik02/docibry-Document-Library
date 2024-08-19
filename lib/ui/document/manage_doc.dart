@@ -112,8 +112,9 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
           actions: [
             IconButton(
               onPressed: _handleDelete,
-              icon:
-                  widget.isAdd ? Container() : Icon(Icons.delete_outline_sharp),
+              icon: widget.isAdd
+                  ? Container()
+                  : const Icon(Icons.delete_outline_sharp),
             ),
           ],
         ),
@@ -296,8 +297,6 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
 
   Future<void> _handleSubmit() async {
     if (_docNameController.text.isNotEmpty &&
-        _docIdController.text.isNotEmpty &&
-        _holderNameController.text.isNotEmpty &&
         _selectedCategory != null &&
         _image != null) {
       final encryptedDocImage = await DocModel.fileToBase64(_image!);
@@ -307,8 +306,12 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
               AddDocument(
                 docName: _docNameController.text,
                 docCategory: _selectedCategory!,
-                docId: _docIdController.text,
-                holdersName: _holderNameController.text,
+                docId: _docIdController.text.isNotEmpty
+                    ? _docIdController.text
+                    : ' ',
+                holdersName: _holderNameController.text.isNotEmpty
+                    ? _holderNameController.text
+                    : ' ',
                 filePath: encryptedDocImage,
               ),
             );
@@ -328,16 +331,15 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
   }
 
   void _handleUpdate() async {
-    if (_docNameController.text.isNotEmpty &&
-        _docIdController.text.isNotEmpty &&
-        _holderNameController.text.isNotEmpty &&
-        _selectedCategory != null) {
+    if (_docNameController.text.isNotEmpty && _selectedCategory != null) {
       final updatedDoc = DocModel(
         uid: widget.document!.uid,
         docName: _docNameController.text,
         docCategory: _selectedCategory!,
-        docId: _docIdController.text,
-        holdersName: _holderNameController.text,
+        docId: _docIdController.text.isNotEmpty ? _docIdController.text : ' ',
+        holdersName: _holderNameController.text.isNotEmpty
+            ? _holderNameController.text
+            : ' ',
         dateAdded: widget.document!.dateAdded,
         docFile: _image != null
             ? await DocModel.fileToBase64(_image!)
