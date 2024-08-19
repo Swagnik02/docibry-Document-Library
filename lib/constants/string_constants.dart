@@ -40,7 +40,6 @@ class StringConstants {
   static const String stringAddDoc = 'Add Document';
   static const String stringAddFile = 'Add file';
   static const String stringEnterDocName = 'Enter Document Name';
-
   static const String stringSelectCategory = 'Select Category';
   static const String stringCategory = 'Category';
   static const String stringDocumentId = 'Document ID';
@@ -54,12 +53,15 @@ class StringConstants {
   static const String stringEditDoc = 'Edit Document';
   static const String stringEditModeEnabled = 'Edit Mode Enabled';
 
-  // error
+  // error strings
   static const String stringError = 'Error:';
   static const String stringDeleteDocSuccess =
       'Document deleted successfully !';
   static const String stringNoDocsFound = 'No documents found';
   static const String stringNoDataFound = 'No data available';
+  static const String stringUnsupportedFileType =
+      'Unsupported file type selected';
+  static const String stringNoFileSelected = 'No file selected';
 
   // warnings
   static const String stringFillAll = 'Please fill all fields';
@@ -71,7 +73,14 @@ class StringConstants {
   static const String stringSubmit = 'SUBMIT';
   static const String stringUpdate = 'UPDATE';
   static const String stringEdit = 'EDIT';
+  static const String stringPickedFile = 'Picked file';
+  static const String stringFilePath = 'File path';
 
   // Share doc
   static const String stringShareDoc = 'Share Document';
+}
+
+class FileExtensions {
+  static const List<String> imageExtensions = ['jpg', 'jpeg', 'png'];
+  static const List<String> docExtensions = ['pdf'];
 }

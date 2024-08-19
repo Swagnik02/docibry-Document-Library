@@ -1,9 +1,9 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:docibry/services/file_converter.dart';
 import 'package:docibry/ui/shareDoc/share_doc_page.dart';
 import 'package:docibry/ui/widgets/custom_show_snackbar.dart';
 import 'package:docibry/ui/widgets/custom_text_field.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/blocs/document/document_state.dart';
@@ -12,7 +12,7 @@ import 'package:docibry/models/document_model.dart';
 import 'package:docibry/ui/document/custom_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ManageDocumentPage extends StatefulWidget {
   final bool isAdd;
@@ -32,7 +32,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     with SingleTickerProviderStateMixin {
   late bool _isEditMode;
   File? _image;
-  final ImagePicker _picker = ImagePicker();
+  // final ImagePicker _picker = ImagePicker();
 
   String? _selectedCategory;
   late TabController _tabController;
@@ -188,7 +188,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         child: GestureDetector(
           onTap: () async {
             if (_isEditMode || widget.isAdd) {
-              _pickImage();
+              await _pickFile();
             }
           },
           child: Card(
@@ -367,28 +367,41 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     }
   }
 
-  Future<void> _pickImage() async {
-    var status = await Permission.photos.status;
+  Future<void> _pickFile() async {
+    File? convertedImage;
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: [
+        ...FileExtensions.imageExtensions,
+        ...FileExtensions.docExtensions
+      ],
+    );
 
-    if (!status.isGranted) {
-      status = await Permission.photos.request();
-    }
+    if (result != null) {
+      final pickedFile = result.files.single;
 
-    if (status.isGranted) {
-      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-      if (mounted) {
+      if (FileExtensions.docExtensions.contains(pickedFile.extension)) {
+        log('${StringConstants.stringPickedFile}: ${pickedFile.name}');
+        log('${StringConstants.stringFilePath}: ${pickedFile.path}');
+
+        convertedImage = await pdfToImage(pickedFile);
+
         setState(() {
-          if (pickedFile != null) {
-            _image = File(pickedFile.path);
-          } else {
-            log(StringConstants.stringNoImageSelected);
-          }
+          _image = convertedImage;
         });
+      } else if (FileExtensions.imageExtensions
+          .contains(pickedFile.extension)) {
+        log('${StringConstants.stringPickedFile}: ${pickedFile.name}');
+        log('${StringConstants.stringFilePath}: ${pickedFile.path}');
+
+        setState(() {
+          _image = File(pickedFile.path!);
+        });
+      } else {
+        log('${StringConstants.stringError}: ${StringConstants.stringUnsupportedFileType}');
       }
     } else {
-      if (mounted) {
-        showSnackBar(context, StringConstants.stringPermsDenied);
-      }
+      log('${StringConstants.stringError}: ${StringConstants.stringNoFileSelected}');
     }
   }
 }
