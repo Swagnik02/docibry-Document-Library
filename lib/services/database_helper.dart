@@ -1,5 +1,7 @@
-import 'package:sqflite/sqflite.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
+import 'package:sembast/sembast.dart';
+import 'package:sembast/sembast_io.dart';
 import 'package:docibry/models/document_model.dart';
 
 class DatabaseHelper {
@@ -8,6 +10,7 @@ class DatabaseHelper {
   DatabaseHelper._internal();
 
   Database? _database;
+  final _store = intMapStoreFactory.store('documents');
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -16,69 +19,38 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    final dbPath = join(await getDatabasesPath(), 'documents.db');
-    return await openDatabase(
-      dbPath,
-      version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE documents (
-            uid INTEGER PRIMARY KEY,
-            docName TEXT,
-            docCategory TEXT,
-            docId TEXT,
-            holdersName TEXT,
-            dateAdded INTEGER,
-            docFile TEXT
-          )
-        ''');
-      },
-    );
+    final dir = await getApplicationDocumentsDirectory();
+    final dbPath = join(dir.path, 'documents.db');
+    return await databaseFactoryIo.openDatabase(dbPath);
   }
 
   Future<void> insertDocument(DocModel doc) async {
     final db = await database;
-    await db.insert(
-      'documents',
-      doc.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _store.add(db, doc.toMap());
   }
 
   Future<List<DocModel>> getDocuments() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('documents');
-    return List.generate(maps.length, (i) {
-      return DocModel(
-        uid: maps[i]['uid'],
-        docName: maps[i]['docName'],
-        docCategory: maps[i]['docCategory'],
-        docId: maps[i]['docId'],
-        holdersName: maps[i]['holdersName'],
-        dateAdded: DateTime.fromMillisecondsSinceEpoch(maps[i]['dateAdded']),
-        docFile: maps[i]['docFile'],
-      );
-    });
+    final finder = Finder(sortOrders: [SortOrder('uid')]);
+    final recordSnapshots = await _store.find(db, finder: finder);
+
+    return recordSnapshots.map((snapshot) {
+      final doc = DocModel.fromMap(snapshot.value);
+      return doc.copyWith(uid: snapshot.key);
+    }).toList();
   }
 
   Future<void> updateDocument(DocModel doc) async {
     final db = await database;
-    await db.update(
-      'documents',
-      doc.toMap(),
-      where: 'uid = ?',
-      whereArgs: [doc.uid],
-    );
+    final finder = Finder(filter: Filter.byKey(doc.uid));
+    await _store.update(db, doc.toMap(), finder: finder);
   }
 
   Future<void> deleteDocument(int uid) async {
     try {
       final db = await database;
-      await db.delete(
-        'documents',
-        where: 'uid = ?',
-        whereArgs: [uid],
-      );
+      final finder = Finder(filter: Filter.byKey(uid));
+      await _store.delete(db, finder: finder);
     } catch (e) {
       throw Exception('Failed to delete document: $e');
     }
@@ -86,15 +58,17 @@ class DatabaseHelper {
 
   // db viewer
   Future<List<String>> getTableNames() async {
-    final db = await database;
-    final List<Map<String, dynamic>> tables = await db.rawQuery('''
-      SELECT name FROM sqlite_master WHERE type='table'
-    ''');
-    return tables.map((table) => table['name'] as String).toList();
+    // sembast does not have traditional SQL tables,
+    // so we can't list table names directly. This method is redundant.
+    return ['documents']; // Just to simulate one store as table
   }
 
   Future<List<Map<String, dynamic>>> getTableData(String tableName) async {
+    if (tableName != 'documents') {
+      throw Exception('Table $tableName does not exist.');
+    }
     final db = await database;
-    return await db.query(tableName);
+    final recordSnapshots = await _store.find(db);
+    return recordSnapshots.map((snapshot) => snapshot.value).toList();
   }
 }

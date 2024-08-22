@@ -47,6 +47,18 @@ class DocModel {
     );
   }
 
+  DocModel copyWith({int? uid}) {
+    return DocModel(
+      uid: uid ?? this.uid,
+      docName: this.docName,
+      docCategory: this.docCategory,
+      docId: this.docId,
+      holdersName: this.holdersName,
+      dateAdded: this.dateAdded,
+      docFile: this.docFile,
+    );
+  }
+
   // Helper method to convert a file to a Base64 string
   static Future<String> fileToBase64(File file) async {
     final bytes = await file.readAsBytes();
