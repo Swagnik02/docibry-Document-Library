@@ -3,6 +3,7 @@ import 'dart:developer';
 // import 'package:docibry/ui/shareDoc/share_doc_page.dart';
 import 'package:docibry/ui/document/manage_doc.dart';
 import 'package:docibry/ui/shareDoc/share_doc_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:docibry/models/document_model.dart';
 
@@ -38,7 +39,7 @@ class DocCard extends StatelessWidget {
                   ),
                 );
               },
-              icon: const Icon(Icons.share),
+              icon: const Icon(kIsWeb ? Icons.save_alt_rounded : Icons.share),
             ),
           ),
           Column(

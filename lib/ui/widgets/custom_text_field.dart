@@ -19,25 +19,22 @@ Widget buildTextField({
   );
 }
 
-Padding docNameTextField({
+Widget docNameTextField({
   required TextEditingController controller,
   required String hintText,
   required bool isAdd,
   required bool isEditMode,
 }) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 16),
-    child: TextField(
-      controller: controller,
-      textCapitalization: TextCapitalization.words,
-      textAlign: TextAlign.center,
-      decoration: InputDecoration(
-        hintText: hintText,
-        border: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-        ),
+  return TextField(
+    controller: controller,
+    textCapitalization: TextCapitalization.words,
+    textAlign: TextAlign.center,
+    decoration: InputDecoration(
+      hintText: hintText,
+      border: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
-      readOnly: !isAdd && !isEditMode,
     ),
+    readOnly: !isAdd && !isEditMode,
   );
 }

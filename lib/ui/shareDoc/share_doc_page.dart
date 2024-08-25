@@ -66,15 +66,23 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
                     _btnShareAsPdf(context),
                   ],
                 ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Save to device as '),
-                  const Icon(Icons.save_alt_rounded),
-                  _btnSaveToDeviceJpg(context),
-                  _btnSaveToDevicePdf(context),
-                ],
-              ),
+              kIsWeb
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _btnSaveToDeviceJpg(context),
+                        _btnSaveToDevicePdf(context),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Save to device as '),
+                        const Icon(Icons.save_alt_rounded),
+                        _btnSaveToDeviceJpg(context),
+                        _btnSaveToDevicePdf(context),
+                      ],
+                    ),
             ],
           ),
         ),
@@ -82,6 +90,23 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     );
   }
 
+  Widget _imageDisplay(BuildContext context) {
+    final windowHeight = MediaQuery.of(context).size.height;
+
+    return SizedBox(
+      height: windowHeight - 200,
+      width: double.infinity,
+      child: Card(
+        elevation: 3,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10.0),
+          child: base64ToImage(widget.document!.docFile),
+        ),
+      ),
+    );
+  }
+
+  // share as buttons
   Widget _btnShareAsImg(BuildContext context) {
     return IconButton.outlined(
       onPressed: () async {
@@ -114,46 +139,68 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     );
   }
 
+  // save to device buttons
   Widget _btnSaveToDeviceJpg(BuildContext context) {
-    return IconButton.outlined(
-      onPressed: () async {
-        await requestPermission(Permission.manageExternalStorage);
-        try {
-          await saveToDeviceJpg(
-              widget.document!.docFile, widget.document!.docId);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Document saved to Downloads')),
-          );
-        } catch (e) {
-          log(e.toString());
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error saving document: $e')),
-          );
-        }
-      },
-      icon: const Icon(Icons.image),
-    );
+    final windowWidth = MediaQuery.of(context).size.width;
+    if (kIsWeb) {
+      return SizedBox(
+        width: windowWidth / 3,
+        child: ElevatedButton(
+          onPressed: () async {
+            _save2device(true);
+          },
+          child: const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Download as '),
+                Icon(Icons.image),
+              ],
+            ),
+          ),
+        ),
+      );
+    } else {
+      return IconButton.outlined(
+        onPressed: () async {
+          await _save2device(true);
+        },
+        icon: const Icon(Icons.image),
+      );
+    }
   }
 
   Widget _btnSaveToDevicePdf(BuildContext context) {
-    return IconButton.outlined(
-      onPressed: () async {
-        await requestPermission(Permission.manageExternalStorage);
-        try {
-          await saveToDevicePdf(
-              widget.document!.docFile, widget.document!.docId);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Document saved to Downloads')),
-          );
-        } catch (e) {
-          log(e.toString());
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error saving document: $e')),
-          );
-        }
-      },
-      icon: const Icon(Icons.picture_as_pdf_rounded),
-    );
+    final windowWidth = MediaQuery.of(context).size.width;
+
+    if (kIsWeb) {
+      return SizedBox(
+        width: windowWidth / 3,
+        child: ElevatedButton(
+          onPressed: () async {
+            _save2device(false);
+          },
+          child: const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Download as '),
+                Icon(Icons.picture_as_pdf),
+              ],
+            ),
+          ),
+        ),
+      );
+    } else {
+      return IconButton.outlined(
+        onPressed: () async {
+          _save2device(false);
+        },
+        icon: const Icon(Icons.picture_as_pdf_rounded),
+      );
+    }
   }
 
   Card _shareTextField() {
@@ -174,20 +221,6 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     );
   }
 
-  Widget _imageDisplay(BuildContext context) {
-    return SizedBox(
-      height: 400,
-      width: double.infinity,
-      child: Card(
-        elevation: 3,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10.0),
-          child: base64ToImage(widget.document!.docFile),
-        ),
-      ),
-    );
-  }
-
   void _shareAsImage(String imageFile, String shareText) async {
     Share.shareXFiles([await base64ToXfile(imageFile)], text: shareText);
   }
@@ -195,5 +228,25 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
   void _shareAsPdf(String imageFile, String shareText) async {
     Share.shareXFiles([await base64ToPdf(imageFile, widget.document!.docId)],
         text: shareText);
+  }
+
+  Future<void> _save2device(bool asImage) async {
+    await requestPermission(Permission.manageExternalStorage);
+    try {
+      asImage
+          ? await saveToDeviceJpg(
+              widget.document!.docFile, widget.document!.docId)
+          : await saveToDevicePdf(
+              widget.document!.docFile, widget.document!.docId);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Document saved to Downloads')),
+      );
+    } catch (e) {
+      log(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving document: $e')),
+      );
+    }
   }
 }

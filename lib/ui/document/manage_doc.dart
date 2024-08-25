@@ -129,20 +129,11 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
             ),
           ],
         ),
-        body: Column(
-          children: [
-            docNameTextField(
-              controller: _docNameController,
-              hintText: StringConstants.stringEnterDocName,
-              isAdd: widget.isAdd,
-              isEditMode: _isEditMode,
-            ),
-            customTabs(),
-            submitButton(),
-          ],
-        ),
+        body: _bodyContent(),
         floatingActionButton: !widget.isAdd
-            ? FloatingActionButton(
+            ? FloatingActionButton.extended(
+                isExtended: kIsWeb,
+                tooltip: kIsWeb ? 'Download' : 'Share',
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -153,11 +144,73 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                     ),
                   );
                 },
-                child: const Icon(Icons.share),
+                icon: const Icon(kIsWeb ? Icons.download : Icons.share),
+                label: const Text(kIsWeb ? 'Save to device' : 'Share'),
               )
             : null,
       ),
     );
+  }
+
+  Widget _bodyContent() {
+    final windowWidth = MediaQuery.of(context).size.width;
+
+    if (windowWidth > 720) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: windowWidth / 2,
+                  child: docNameTextField(
+                    controller: _docNameController,
+                    hintText: StringConstants.stringEnterDocName,
+                    isAdd: widget.isAdd,
+                    isEditMode: _isEditMode,
+                  ),
+                ),
+                SizedBox(
+                  width: windowWidth / 3,
+                  child: submitButton(),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(child: tab1()), // Wrap with Expanded
+                Expanded(child: tab2()), // Wrap with Expanded
+              ],
+            ),
+          )
+        ],
+      );
+    } else {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: docNameTextField(
+              controller: _docNameController,
+              hintText: StringConstants.stringEnterDocName,
+              isAdd: widget.isAdd,
+              isEditMode: _isEditMode,
+            ),
+          ),
+          customTabs(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: submitButton(),
+          ),
+        ],
+      );
+    }
   }
 
   Expanded customTabs() {
@@ -228,7 +281,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
       child: SizedBox(
         width: double.infinity,
         child: Card(
-          elevation: 3,
+          elevation: 5,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
           ),
@@ -294,32 +347,34 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     );
   }
 
-  Container submitButton() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: widget.isAdd
-            ? _handleSubmit
-            : _isEditMode
-                ? _handleUpdate
-                : _handleEdit,
-        child: _isLoading
-            ? const Padding(
-                padding: EdgeInsets.all(15.0),
-                child: CircularProgressIndicator(),
-              )
-            : Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Text(
-                  widget.isAdd
-                      ? StringConstants.stringSubmit
-                      : _isEditMode
-                          ? StringConstants.stringUpdate
-                          : StringConstants.stringEdit,
+  Widget submitButton() {
+    final windowWidth = MediaQuery.of(context).size.width;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Container(
+        width: windowWidth / 2,
+        child: FilledButton(
+          onPressed: widget.isAdd
+              ? _handleSubmit
+              : _isEditMode
+                  ? _handleUpdate
+                  : _handleEdit,
+          child: _isLoading
+              ? const Padding(
+                  padding: EdgeInsets.all(15.0),
+                  child: CircularProgressIndicator(),
+                )
+              : Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 15.0),
+                  child: Text(
+                    widget.isAdd
+                        ? StringConstants.stringSubmit
+                        : _isEditMode
+                            ? StringConstants.stringUpdate
+                            : StringConstants.stringEdit,
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
