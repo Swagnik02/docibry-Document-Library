@@ -37,6 +37,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
   late bool _isEditMode;
   io.File? _image;
   Uint8List? _imageBytes;
+  bool _isLoading = false;
 
   String? _selectedCategory;
   late TabController _tabController;
@@ -295,8 +296,8 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
 
   Container submitButton() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       width: double.infinity,
       child: OutlinedButton(
         onPressed: widget.isAdd
@@ -304,19 +305,31 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
             : _isEditMode
                 ? _handleUpdate
                 : _handleEdit,
-        child: Text(
-          widget.isAdd
-              ? StringConstants.stringSubmit
-              : _isEditMode
-                  ? StringConstants.stringUpdate
-                  : StringConstants.stringEdit,
-        ),
+        child: _isLoading
+            ? const Padding(
+                padding: EdgeInsets.all(15.0),
+                child: CircularProgressIndicator(),
+              )
+            : Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Text(
+                  widget.isAdd
+                      ? StringConstants.stringSubmit
+                      : _isEditMode
+                          ? StringConstants.stringUpdate
+                          : StringConstants.stringEdit,
+                ),
+              ),
       ),
     );
   }
 
   Future<void> _handleSubmit() async {
     if (_docNameController.text.isNotEmpty && _selectedCategory != null) {
+      setState(() {
+        _isLoading = true;
+      });
+
       var encryptedDocImage;
       if (kIsWeb) {
         if (_imageBytes != null) {
@@ -360,6 +373,10 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
 
   void _handleUpdate() async {
     if (_docNameController.text.isNotEmpty && _selectedCategory != null) {
+      setState(() {
+        _isLoading = true;
+      });
+
       final updatedDoc = DocModel(
         uid: widget.document!.uid,
         docName: _docNameController.text,
@@ -388,6 +405,9 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
   }
 
   void _handleDelete() {
+    setState(() {
+      _isLoading = true;
+    });
     if (widget.document != null) {
       context.read<DocumentBloc>().add(
             DeleteDocument(
