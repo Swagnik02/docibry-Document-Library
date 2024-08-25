@@ -2,8 +2,8 @@ import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:docibry/models/document_model.dart';
 import 'package:docibry/services/database_helper.dart';
-import 'package:docibry/services/firestore_helper.dart'; // Ensure you have a FirestoreHelper class
-import 'package:flutter/foundation.dart'; // Import for kIsWeb
+import 'package:docibry/services/firestore_helper.dart';
+import 'package:flutter/foundation.dart';
 import 'document_event.dart';
 import 'document_state.dart';
 
@@ -25,20 +25,17 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     try {
       emit(DocumentLoading());
 
-      List<DocModel> documents;
-
-      // Load local documents first
-      if (!kIsWeb) {
-        documents = await _dbHelper.getDocuments(userId);
+      if (kIsWeb) {
+        log('Fetching documents on Web');
+        final documents = await _firestoreHelper.fetchDocumentsForUser(userId);
+        emit(DocumentLoaded(documents: documents));
+      } else {
+        // Load local documents first
+        final documents = await _dbHelper.getDocuments(userId);
         emit(DocumentLoaded(documents: documents));
 
         // Start background sync with Firestore
         _syncWithFirestoreInBackground();
-      } else {
-        // Web-specific logic to fetch documents
-        log('Fetching documents on Web');
-        documents = await _firestoreHelper.fetchDocumentsForUser(userId);
-        emit(DocumentLoaded(documents: documents));
       }
     } catch (e) {
       log('Error fetching documents: $e');
@@ -61,19 +58,19 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
       if (kIsWeb) {
         log('Adding document on Web');
         await _firestoreHelper.addDocument(userId, doc);
+        final documents = await _firestoreHelper.fetchDocumentsForUser(userId);
+        emit(DocumentLoaded(documents: documents));
       } else {
-        // Insert document into local database (this should only be used on mobile/desktop)
+        // Insert document into local database
         await _dbHelper.insertDocument(userId, doc);
 
         // Check for internet connectivity and add to Firestore if available
         if (await _isInternetAvailable()) {
           await _firestoreHelper.addDocument(userId, doc);
         }
+        final documents = await _dbHelper.getDocuments(userId);
+        emit(DocumentLoaded(documents: documents));
       }
-
-      // Refresh the documents to reflect the latest state
-      final documents = await _dbHelper.getDocuments(userId);
-      emit(DocumentLoaded(documents: documents));
 
       log('Document added successfully');
     } catch (e) {
@@ -90,16 +87,16 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
       if (kIsWeb) {
         log('Updating document on Web');
         await _firestoreHelper.updateDocument(userId, doc);
+        final documents = await _firestoreHelper.fetchDocumentsForUser(userId);
+        emit(DocumentLoaded(documents: documents));
       } else {
         await _dbHelper.updateDocument(userId, doc);
         if (await _isInternetAvailable()) {
           await _firestoreHelper.updateDocument(userId, doc);
         }
+        final documents = await _dbHelper.getDocuments(userId);
+        emit(DocumentLoaded(documents: documents));
       }
-
-      // Refresh the documents to reflect the latest state
-      final documents = await _dbHelper.getDocuments(userId);
-      emit(DocumentLoaded(documents: documents));
 
       log('Document updated successfully');
     } catch (e) {
@@ -114,16 +111,16 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
       if (kIsWeb) {
         log('Deleting document on Web');
         await _firestoreHelper.deleteDocument(userId, event.uid);
+        final documents = await _firestoreHelper.fetchDocumentsForUser(userId);
+        emit(DocumentLoaded(documents: documents));
       } else {
         await _dbHelper.deleteDocument(userId, event.uid);
         if (await _isInternetAvailable()) {
           await _firestoreHelper.deleteDocument(userId, event.uid);
         }
+        final documents = await _dbHelper.getDocuments(userId);
+        emit(DocumentLoaded(documents: documents));
       }
-
-      // Refresh the documents to reflect the latest state
-      final documents = await _dbHelper.getDocuments(userId);
-      emit(DocumentLoaded(documents: documents));
 
       log('Document deleted successfully');
     } catch (e) {
@@ -133,6 +130,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   }
 
   Future<bool> _isInternetAvailable() async {
+    // Implement your internet connectivity check here
     return true;
   }
 
