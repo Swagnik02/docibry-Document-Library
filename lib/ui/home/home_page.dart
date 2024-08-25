@@ -76,7 +76,7 @@ class HomePageState extends State<HomePage> {
             ),
             body: Column(
               children: [
-                _searchBar(),
+                if (MediaQuery.of(context).size.height > 340) _searchBar(),
                 _categoryFilters(),
                 _docs(filteredDocs),
               ],
