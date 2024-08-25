@@ -1,18 +1,22 @@
+import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
-import 'package:docibry/services/file_converter.dart';
-import 'package:docibry/ui/shareDoc/share_doc_page.dart';
-import 'package:docibry/ui/widgets/custom_show_snackbar.dart';
-import 'package:docibry/ui/widgets/custom_text_field.dart';
+import 'dart:io' as io;
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/blocs/document/document_state.dart';
+import 'package:docibry/services/file_converter.dart';
+import 'package:docibry/services/permission_handler.dart';
+import 'package:docibry/ui/shareDoc/share_doc_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:docibry/ui/widgets/custom_show_snackbar.dart';
+import 'package:docibry/ui/widgets/custom_text_field.dart';
 import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/models/document_model.dart';
 import 'package:docibry/ui/document/custom_tab.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ManageDocumentPage extends StatefulWidget {
   final bool isAdd;
@@ -31,8 +35,8 @@ class ManageDocumentPage extends StatefulWidget {
 class ManageDocumentPageState extends State<ManageDocumentPage>
     with SingleTickerProviderStateMixin {
   late bool _isEditMode;
-  File? _image;
-  // final ImagePicker _picker = ImagePicker();
+  io.File? _image;
+  Uint8List? _imageBytes;
 
   String? _selectedCategory;
   late TabController _tabController;
@@ -43,6 +47,12 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
   @override
   void initState() {
     super.initState();
+
+    if (!kIsWeb) {
+      requestPermission(Permission.storage);
+      requestPermission(Permission.manageExternalStorage);
+    }
+
     _selectedCategory = StringDocCategory.categoryList.isNotEmpty
         ? StringDocCategory.categoryList.first
         : null;
@@ -130,19 +140,21 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
             submitButton(),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ShareDocumentPage(
-                  document: widget.document,
-                ),
-              ),
-            );
-          },
-          child: const Icon(Icons.share),
-        ),
+        floatingActionButton: !widget.isAdd
+            ? FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ShareDocumentPage(
+                        document: widget.document,
+                      ),
+                    ),
+                  );
+                },
+                child: const Icon(Icons.share),
+              )
+            : null,
       ),
     );
   }
@@ -163,14 +175,19 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
   }
 
   Widget tab1() {
-    final Widget imageWidget = _image != null
-        ? ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
-            child: Image.file(
-              _image!,
-              fit: BoxFit.contain,
-            ),
-          )
+    final Widget imageWidget = _imageBytes != null || _image != null
+        ? kIsWeb
+            ? Image.memory(
+                _imageBytes!,
+                fit: BoxFit.contain,
+              )
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(10.0),
+                child: Image.file(
+                  _image!,
+                  fit: BoxFit.contain,
+                ),
+              )
         : widget.isAdd
             ? const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -179,23 +196,26 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                   Text(StringConstants.stringAddFile),
                 ],
               )
-            : DocModel.base64ToImage(widget.document!.docFile);
+            : Image.memory(base64ToUint8List(widget.document!.docFile));
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5),
       child: SizedBox(
         height: 500,
         width: double.infinity,
-        child: GestureDetector(
-          onTap: () async {
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            elevation: 3,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+          ),
+          onPressed: () async {
             if (_isEditMode || widget.isAdd) {
               await _pickFile();
             }
           },
-          child: Card(
-            elevation: 3,
-            child: imageWidget,
-          ),
+          child: imageWidget,
         ),
       ),
     );
@@ -296,10 +316,17 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
   }
 
   Future<void> _handleSubmit() async {
-    if (_docNameController.text.isNotEmpty &&
-        _selectedCategory != null &&
-        _image != null) {
-      final encryptedDocImage = await DocModel.fileToBase64(_image!);
+    if (_docNameController.text.isNotEmpty && _selectedCategory != null) {
+      var encryptedDocImage;
+      if (kIsWeb) {
+        if (_imageBytes != null) {
+          encryptedDocImage = base64Encode(_imageBytes!);
+        }
+      } else {
+        if (_image != null) {
+          encryptedDocImage = await fileToBase64(_image!);
+        }
+      }
 
       if (mounted) {
         context.read<DocumentBloc>().add(
@@ -318,6 +345,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
       }
     } else {
       if (mounted) {
+        log('error submit button');
         showSnackBar(context, StringConstants.stringFillAll);
       }
     }
@@ -342,7 +370,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
             : ' ',
         dateAdded: widget.document!.dateAdded,
         docFile: _image != null
-            ? await DocModel.fileToBase64(_image!)
+            ? await fileToBase64(_image!)
             : widget.document!.docFile,
       );
       if (mounted) {
@@ -370,8 +398,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
   }
 
   Future<void> _pickFile() async {
-    File? convertedImage;
-    final result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: [
         ...FileExtensions.imageExtensions,
@@ -381,29 +408,40 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
 
     if (result != null) {
       final pickedFile = result.files.single;
+      log('Picked file: ${pickedFile.name}');
 
-      if (FileExtensions.docExtensions.contains(pickedFile.extension)) {
-        log('${StringConstants.stringPickedFile}: ${pickedFile.name}');
-        log('${StringConstants.stringFilePath}: ${pickedFile.path}');
+      // Web platform: Handle file using bytes
+      if (kIsWeb) {
+        _imageBytes = pickedFile.bytes;
+        if (_imageBytes != null) {
+          log('File bytes length: ${_imageBytes!.length}');
+          setState(() {
+            _image = null;
+          });
+        } else {
+          log('No bytes found for the selected file.');
+        }
+      }
+      // Mobile/Desktop platform: Handle file using file path
+      else {
+        log('File path: ${pickedFile.path}');
 
-        convertedImage = await pdfToImage(pickedFile);
-
-        setState(() {
-          _image = convertedImage;
-        });
-      } else if (FileExtensions.imageExtensions
-          .contains(pickedFile.extension)) {
-        log('${StringConstants.stringPickedFile}: ${pickedFile.name}');
-        log('${StringConstants.stringFilePath}: ${pickedFile.path}');
-
-        setState(() {
-          _image = File(pickedFile.path!);
-        });
-      } else {
-        log('${StringConstants.stringError}: ${StringConstants.stringUnsupportedFileType}');
+        if (FileExtensions.docExtensions.contains(pickedFile.extension)) {
+          io.File? convertedImage = await pdfToImage(pickedFile);
+          setState(() {
+            _image = convertedImage;
+          });
+        } else if (FileExtensions.imageExtensions
+            .contains(pickedFile.extension)) {
+          setState(() {
+            _image = io.File(pickedFile.path!);
+          });
+        } else {
+          log('Unsupported file type.');
+        }
       }
     } else {
-      log('${StringConstants.stringError}: ${StringConstants.stringNoFileSelected}');
+      log('No file selected.');
     }
   }
 }

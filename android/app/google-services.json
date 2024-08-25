@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "585424032749",
+    "project_id": "docibry-document-library",
+    "storage_bucket": "docibry-document-library.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:585424032749:android:b3e77b68dc5b61a4544de4",
+        "android_client_info": {
+          "package_name": "com.azapps.docibry"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXOY6Bm6wytaU0fFO2lpDhxlbOlvCTIPA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

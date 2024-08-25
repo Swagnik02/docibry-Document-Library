@@ -1,10 +1,8 @@
 import 'package:docibry/constants/routes.dart';
 import 'package:docibry/models/document_model.dart';
-import 'package:docibry/services/db_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
-import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/constants/string_constants.dart';
 import 'doc_card.dart';
@@ -29,7 +27,7 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    context.read<DocumentBloc>().add(FetchDocuments());
+    // context.read<DocumentBloc>().add(FetchDocuments());
   }
 
   @override
@@ -37,7 +35,6 @@ class HomePageState extends State<HomePage> {
     return BlocConsumer<DocumentBloc, DocumentState>(
       listener: (context, state) {
         if (state is DocumentError) {
-          // Handle error state if needed
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error: ${state.error}'),
@@ -65,12 +62,12 @@ class HomePageState extends State<HomePage> {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.person),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const DbViewPage(),
-                      ),
-                    );
+                  onPressed: () async {
+                    // Navigator.of(context).push(
+                    //   MaterialPageRoute(
+                    //     builder: (context) => const FirestoreDataPage(),
+                    //   ),
+                    // );
                   },
                 ),
               ],

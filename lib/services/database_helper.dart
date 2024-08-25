@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:sembast/sembast.dart';
@@ -10,65 +11,119 @@ class DatabaseHelper {
   DatabaseHelper._internal();
 
   Database? _database;
-  final _store = intMapStoreFactory.store('documents');
+  late final Database _db;
 
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDatabase();
-    return _database!;
+  // Initialize the database and stores
+  Future<void> init() async {
+    if (!kIsWeb) {
+      _db = await _initDatabase();
+    }
   }
 
   Future<Database> _initDatabase() async {
+    if (kIsWeb) {
+      throw UnsupportedError(
+          'Database operations are not supported on the web.');
+    }
+
     final dir = await getApplicationDocumentsDirectory();
     final dbPath = join(dir.path, 'documents.db');
     return await databaseFactoryIo.openDatabase(dbPath);
   }
 
-  Future<void> insertDocument(DocModel doc) async {
-    final db = await database;
-    await _store.add(db, doc.toMap());
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    if (kIsWeb) {
+      throw UnsupportedError(
+          'Database operations are not supported on the web.');
+    }
+    _database = await _initDatabase();
+    return _database!;
   }
 
-  Future<List<DocModel>> getDocuments() async {
+  // Get the store for a specific user
+  Future<StoreRef<int, Map<String, dynamic>>> _getUserDocsStore(
+      String userId) async {
+    if (kIsWeb) {
+      throw UnsupportedError(
+          'Database operations are not supported on the web.');
+    }
+    final db = await database;
+    final userStore = intMapStoreFactory.store('users/$userId');
+    return userStore;
+  }
+
+  Future<void> insertDocument(String userId, DocModel doc) async {
+    final userStore = await _getUserDocsStore(userId);
+    final db = await database;
+
+    // Check if the document already exists
+    final finder =
+        Finder(filter: Filter.byKey(doc.uid)); // No conversion to int here
+    final existingDocs = await userStore.find(db, finder: finder);
+
+    if (existingDocs.isEmpty) {
+      await userStore.add(db, doc.toMap());
+    } else {
+      // Optionally update if needed
+      await userStore.update(db, doc.toMap(), finder: finder);
+    }
+  }
+
+  Future<List<DocModel>> getDocuments(String userId) async {
+    if (kIsWeb) {
+      throw UnsupportedError(
+          'Database operations are not supported on the web.');
+    }
+    final userStore = await _getUserDocsStore(userId);
     final db = await database;
     final finder = Finder(sortOrders: [SortOrder('uid')]);
-    final recordSnapshots = await _store.find(db, finder: finder);
+    final recordSnapshots = await userStore.find(db, finder: finder);
 
     return recordSnapshots.map((snapshot) {
       final doc = DocModel.fromMap(snapshot.value);
-      return doc.copyWith(uid: snapshot.key);
+      return doc.copyWith(uid: snapshot.key.toString());
     }).toList();
   }
 
-  Future<void> updateDocument(DocModel doc) async {
+  Future<void> updateDocument(String userId, DocModel doc) async {
+    final userStore = await _getUserDocsStore(userId);
     final db = await database;
-    final finder = Finder(filter: Filter.byKey(doc.uid));
-    await _store.update(db, doc.toMap(), finder: finder);
+    final finder =
+        Finder(filter: Filter.byKey(doc.uid)); // No conversion to int here
+    await userStore.update(db, doc.toMap(), finder: finder);
   }
 
-  Future<void> deleteDocument(int uid) async {
-    try {
-      final db = await database;
-      final finder = Finder(filter: Filter.byKey(uid));
-      await _store.delete(db, finder: finder);
-    } catch (e) {
-      throw Exception('Failed to delete document: $e');
-    }
+  Future<void> deleteDocument(String userId, String uid) async {
+    final userStore = await _getUserDocsStore(userId);
+    final db = await database;
+    final finder =
+        Finder(filter: Filter.byKey(uid)); // No conversion to int here
+    await userStore.delete(db, finder: finder);
   }
 
-  // db viewer
   Future<List<String>> getTableNames() async {
-    // sembast does not have traditional SQL tables,
-    // so we can't list table names directly. This method is redundant.
-    return ['documents']; // Just to simulate one store as table
+    if (kIsWeb) {
+      return ['users']; // Simulate primary store or handle differently for web
+    }
+    // In Sembast, we cannot list tables dynamically.
+    return ['users']; // Simulate primary store
   }
 
   Future<List<Map<String, dynamic>>> getTableData(String tableName) async {
-    if (tableName != 'documents') {
+    if (kIsWeb) {
+      if (tableName != 'users') {
+        throw Exception('Table $tableName does not exist.');
+      }
+      // For the web, simulate or handle differently
+      return [];
+    }
+    if (tableName != 'users') {
       throw Exception('Table $tableName does not exist.');
     }
     final db = await database;
-    final recordSnapshots = await _store.find(db);
+    final userStore = intMapStoreFactory.store('users');
+    final recordSnapshots = await userStore.find(db);
     return recordSnapshots.map((snapshot) => snapshot.value).toList();
   }
 }

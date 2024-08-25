@@ -4,8 +4,11 @@ import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/models/document_model.dart';
 import 'package:docibry/services/file_converter.dart';
+import 'package:docibry/services/permission_handler.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ShareDocumentPage extends StatefulWidget {
@@ -35,7 +38,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
 
   @override
   void dispose() {
-    _controller.dispose(); // Dispose of the controller to prevent memory leaks
+    _controller.dispose();
     super.dispose();
   }
 
@@ -52,16 +55,17 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
           child: Column(
             children: [
               _imageDisplay(context),
-              _shareTextField(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Share as '),
-                  const Icon(Icons.share_outlined),
-                  _btnShareAsImg(context),
-                  _btnShareAsPdf(context),
-                ],
-              ),
+              if (!kIsWeb) _shareTextField(),
+              if (!kIsWeb)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Share as '),
+                    const Icon(Icons.share_outlined),
+                    _btnShareAsImg(context),
+                    _btnShareAsPdf(context),
+                  ],
+                ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -113,6 +117,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
   Widget _btnSaveToDeviceJpg(BuildContext context) {
     return IconButton.outlined(
       onPressed: () async {
+        await requestPermission(Permission.manageExternalStorage);
         try {
           await saveToDeviceJpg(
               widget.document!.docFile, widget.document!.docId);
@@ -133,6 +138,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
   Widget _btnSaveToDevicePdf(BuildContext context) {
     return IconButton.outlined(
       onPressed: () async {
+        await requestPermission(Permission.manageExternalStorage);
         try {
           await saveToDevicePdf(
               widget.document!.docFile, widget.document!.docId);
@@ -176,7 +182,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
         elevation: 3,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10.0),
-          child: DocModel.base64ToImage(widget.document!.docFile),
+          child: base64ToImage(widget.document!.docFile),
         ),
       ),
     );

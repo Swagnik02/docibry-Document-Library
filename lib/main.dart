@@ -1,31 +1,44 @@
+import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/blocs/onBoarding/onboarding_bloc.dart';
 import 'package:docibry/constants/routes.dart';
 import 'package:docibry/constants/string_constants.dart';
-import 'package:docibry/services/database_helper.dart';
+import 'package:docibry/firebase_options.dart';
+import 'package:docibry/models/user_model.dart';
+import 'package:docibry/ui/document/manage_doc.dart';
 import 'package:docibry/ui/onBoarding/onboarding.dart';
 import 'package:docibry/ui/shareDoc/share_doc_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'blocs/document/document_bloc.dart';
 import 'ui/home/home_page.dart';
-import 'ui/document/manage_doc.dart';
+import 'package:flutter/foundation.dart';
+
+Future<String> getCurrentUserId() async {
+  return loggedInUserId;
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DatabaseHelper().getDocuments();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  final userId = await getCurrentUserId();
+
   runApp(
     MultiBlocProvider(
       providers: [
-        BlocProvider<OnboardingBloc>(
-          create: (context) => OnboardingBloc(),
-        ),
+        if (!kIsWeb)
+          BlocProvider<OnboardingBloc>(
+            create: (context) => OnboardingBloc(),
+          ),
         BlocProvider<DocumentBloc>(
-          create: (context) => DocumentBloc()..add(FetchDocuments()),
+          create: (context) =>
+              DocumentBloc(userId: userId)..add(FetchDocuments()),
         ),
-        // Add other BlocProviders here
       ],
-      child: DocibryApp(),
+      child: const DocibryApp(),
     ),
   );
 }
@@ -41,7 +54,7 @@ class DocibryApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
       ),
-      home: Onboarding(),
+      home: kIsWeb ? const HomePage() : Onboarding(),
       routes: {
         homeRoute: (context) => const HomePage(),
         addDocRoute: (context) => const ManageDocumentPage(isAdd: true),
