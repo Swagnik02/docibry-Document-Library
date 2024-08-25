@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:docibry/constants/routes.dart';
 import 'package:docibry/models/document_model.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +64,7 @@ class HomePageState extends State<HomePage> {
                 IconButton(
                   icon: const Icon(Icons.person),
                   onPressed: () async {
+                    print(MediaQuery.sizeOf(context).toString());
                     // Navigator.of(context).push(
                     //   MaterialPageRoute(
                     //     builder: (context) => const FirestoreDataPage(),
@@ -104,17 +106,29 @@ class HomePageState extends State<HomePage> {
   }
 
   Expanded _docs(List<DocModel> filteredDocs) {
+    final currentCount = (MediaQuery.of(context).size.width ~/ 200).toInt();
+
     return Expanded(
       child: filteredDocs.isEmpty
           ? const Center(
               child: Text(StringConstants.stringNoDataFound),
             )
-          : ListView.builder(
-              itemCount: filteredDocs.length,
-              itemBuilder: (context, index) {
-                return DocCard(docModel: filteredDocs[index]);
-              },
-            ),
+          : MediaQuery.of(context).size.width > 395
+              ? GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: max(currentCount, 2),
+                  ),
+                  itemCount: filteredDocs.length,
+                  itemBuilder: (context, index) {
+                    return DocCard(docModel: filteredDocs[index]);
+                  },
+                )
+              : ListView.builder(
+                  itemCount: filteredDocs.length,
+                  itemBuilder: (context, index) {
+                    return DocCard(docModel: filteredDocs[index]);
+                  },
+                ),
     );
   }
 

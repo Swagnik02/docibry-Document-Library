@@ -52,10 +52,13 @@ class DocCard extends StatelessWidget {
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 docModel.docName,
                 style: Theme.of(context).textTheme.displaySmall,
               ),
               Text(
+                overflow: TextOverflow.ellipsis,
                 docModel.docId,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
