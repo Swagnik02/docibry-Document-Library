@@ -1,13 +1,14 @@
 import 'dart:math';
 import 'package:docibry/constants/routes.dart';
-import 'package:docibry/models/document_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/constants/string_constants.dart';
+import 'package:docibry/models/document_model.dart';
 import 'doc_card.dart';
 import 'doc_category_filter_chip.dart';
+import 'search_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,10 +19,17 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   String selectedFilter = StringDocCategory.allCategory;
+  String searchQuery = '';
 
   void _onCategorySelected(String category) {
     setState(() {
       selectedFilter = category;
+    });
+  }
+
+  void _onSearchQueryChanged(String query) {
+    setState(() {
+      searchQuery = query;
     });
   }
 
@@ -50,16 +58,15 @@ class HomePageState extends State<HomePage> {
           final documents = state.documents;
           final filteredDocs = documents
               .where((doc) =>
-                  selectedFilter == StringDocCategory.allCategory ||
-                  doc.docCategory == selectedFilter)
+                  (selectedFilter == StringDocCategory.allCategory ||
+                      doc.docCategory == selectedFilter) &&
+                  doc.docName.toLowerCase().contains(searchQuery.toLowerCase()))
               .toList();
 
           return Scaffold(
             appBar: AppBar(
-              title: Text(
-                StringConstants.appName,
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
+              title:
+                  CustomSearchBar(onSearchQueryChanged: _onSearchQueryChanged),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.person),
@@ -76,7 +83,6 @@ class HomePageState extends State<HomePage> {
             ),
             body: Column(
               children: [
-                if (MediaQuery.of(context).size.height > 340) _searchBar(),
                 _categoryFilters(),
                 _docs(filteredDocs),
               ],
@@ -155,23 +161,6 @@ class HomePageState extends State<HomePage> {
               );
             }),
           ],
-        ),
-      ),
-    );
-  }
-
-  Padding _searchBar() {
-    return const Padding(
-      padding: EdgeInsets.all(8.0),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: 'Search documents...',
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(25),
-            ),
-          ),
-          prefixIcon: Icon(Icons.search),
         ),
       ),
     );
