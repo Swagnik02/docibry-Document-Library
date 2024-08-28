@@ -4,6 +4,7 @@ import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/models/document_model.dart';
 import 'package:docibry/services/file_converter.dart';
+import 'package:docibry/services/file_saver.dart';
 import 'package:docibry/services/permission_handler.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -233,11 +234,11 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
   Future<void> _save2device(bool asImage) async {
     await requestPermission(Permission.manageExternalStorage);
     try {
-      asImage
-          ? await saveToDeviceJpg(
-              widget.document!.docFile, widget.document!.docId)
-          : await saveToDevicePdf(
-              widget.document!.docFile, widget.document!.docId);
+      if (asImage) {
+        await saveToDeviceJpg(widget.document!.docFile, widget.document!.docId);
+      } else {
+        await saveToDevicePdf(widget.document!.docFile, widget.document!.docId);
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Document saved to Downloads')),
