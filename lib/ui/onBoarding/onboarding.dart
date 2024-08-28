@@ -2,18 +2,17 @@ import 'package:docibry/blocs/onBoarding/onboarding_bloc.dart';
 import 'package:docibry/blocs/onBoarding/onboarding_events.dart';
 import 'package:docibry/blocs/onBoarding/onboarding_states.dart';
 import 'package:docibry/ui/home/home_page.dart';
-import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Onboarding extends StatelessWidget {
   final PageController controller = PageController(initialPage: 0);
+
   Onboarding({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: const Color.fromRGBO(34, 31, 30, 1),
       body: BlocBuilder<OnboardingBloc, OnboardingStates>(
         builder: (context, state) {
           return Stack(
@@ -22,9 +21,8 @@ class Onboarding extends StatelessWidget {
               PageView(
                 controller: controller,
                 onPageChanged: (value) {
-                  state.pageIndex = value;
                   BlocProvider.of<OnboardingBloc>(context)
-                      .add(OnboardingEvents());
+                      .add(OnboardingPageChanged(value));
                 },
                 children: [
                   _page(
@@ -48,24 +46,26 @@ class Onboarding extends StatelessWidget {
                     imageUrl: 'assets/images/page3.png',
                     title: 'Achieve Higher Goals',
                     desc:
-                        'By boosting your producivity we help you achieve higher goals',
+                        'By boosting your productivity we help you achieve higher goals',
                   ),
                 ],
               ),
               Positioned(
                 bottom: 150,
-                child: DotsIndicator(
-                  dotsCount: 3,
-                  position:
-                      BlocProvider.of<OnboardingBloc>(context).state.pageIndex,
-                  decorator: DotsDecorator(
-                    color: Colors.white.withOpacity(0.2),
-                    activeColor: Colors.white,
-                    size: const Size.square(9.0),
-                    activeSize: const Size(36.0, 9.0),
-                    activeShape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0)),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(3, (index) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      width: state.pageIndex == index ? 30 : 8,
+                      height: 8,
+                      margin: const EdgeInsets.all(2.0),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    );
+                  }),
                 ),
               ),
             ],
@@ -85,9 +85,6 @@ class Onboarding extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Image.asset(
-        //   imageUrl,
-        // ),
         const SizedBox(height: 40),
         Text(
           title,
@@ -95,9 +92,7 @@ class Onboarding extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 50,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 50),
           child: Text(
             desc,
             textAlign: TextAlign.center,
@@ -129,11 +124,7 @@ class Onboarding extends StatelessWidget {
                         backgroundColor: Theme.of(context).colorScheme.primary,
                       ),
                       onPressed: () {
-                        pageIndex == 2
-                            ? _toHome(context)
-                            : controller.animateToPage(pageIndex + 1,
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.decelerate);
+                        _toHome(context);
                       },
                       child: const Text(
                         'Get Started',
@@ -147,13 +138,10 @@ class Onboarding extends StatelessWidget {
                     )
                   : FilledButton(
                       onPressed: () {
-                        pageIndex == 2
-                            ? _toHome(context)
-                            : controller.animateToPage(
-                                pageIndex + 1,
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.decelerate,
-                              );
+                        controller.nextPage(
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.decelerate,
+                        );
                       },
                       child: const Icon(
                         Icons.arrow_forward_ios_rounded,
@@ -162,7 +150,7 @@ class Onboarding extends StatelessWidget {
                     ),
             ],
           ),
-        )
+        ),
       ],
     );
   }
