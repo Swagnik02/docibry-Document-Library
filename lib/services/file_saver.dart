@@ -22,6 +22,7 @@ Future<void> saveToDevicePdf(String base64String, String title) async {
   }
 }
 
+// web
 Future<void> webSaveToDeviceJpg(String base64String, String title) async {
   if (kIsWeb) {
     final bytes = base64Decode(base64String);
@@ -36,7 +37,6 @@ Future<void> webSaveToDeviceJpg(String base64String, String title) async {
   }
 }
 
-@override
 Future<void> webSaveToDevicePdf(String base64String, String title) async {
   if (kIsWeb) {
     final decodedBytes = base64Decode(base64String);
@@ -62,6 +62,7 @@ Future<void> webSaveToDevicePdf(String base64String, String title) async {
   }
 }
 
+// android
 Future<void> androidSaveToDeviceJpg(String base64String, String title) async {
   if (await Permission.manageExternalStorage.request().isGranted) {
     final file = await base64ToXfile(base64String);
@@ -74,7 +75,6 @@ Future<void> androidSaveToDeviceJpg(String base64String, String title) async {
   }
 }
 
-@override
 Future<void> androidSaveToDevicePdf(String base64String, String title) async {
   if (await Permission.manageExternalStorage.request().isGranted) {
     final pdfFile = await base64ToPdf(base64String, title);
