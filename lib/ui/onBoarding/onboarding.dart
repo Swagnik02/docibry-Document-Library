@@ -1,7 +1,7 @@
 import 'package:docibry/blocs/onBoarding/onboarding_bloc.dart';
 import 'package:docibry/blocs/onBoarding/onboarding_events.dart';
 import 'package:docibry/blocs/onBoarding/onboarding_states.dart';
-import 'package:docibry/ui/home/home_page.dart';
+import 'package:docibry/ui/Auth/auth_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -156,11 +156,11 @@ class Onboarding extends StatelessWidget {
   }
 
   void _toHome(BuildContext context) {
-    Navigator.of(context).pushAndRemoveUntil(
+    Navigator.push(
+      context,
       MaterialPageRoute(
-        builder: (context) => const HomePage(),
+        builder: (context) => const AuthPage(),
       ),
-      (Route<dynamic> route) => false,
     );
   }
 }

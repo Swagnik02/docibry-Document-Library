@@ -1,10 +1,12 @@
+import 'package:docibry/blocs/auth/auth_bloc.dart';
+import 'package:docibry/blocs/auth/auth_states.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/blocs/onBoarding/onboarding_bloc.dart';
 import 'package:docibry/constants/routes.dart';
-import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/firebase_options.dart';
 import 'package:docibry/models/user_model.dart';
+import 'package:docibry/ui/Auth/auth_page.dart';
 import 'package:docibry/ui/document/manage_doc.dart';
 import 'package:docibry/ui/onBoarding/onboarding.dart';
 import 'package:docibry/ui/shareDoc/share_doc_page.dart';
@@ -14,29 +16,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'ui/home/home_page.dart';
 import 'package:flutter/foundation.dart';
 
-Future<String> getCurrentUserId() async {
-  return loggedInUserId;
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  final userId = await getCurrentUserId();
-
   runApp(
     MultiBlocProvider(
       providers: [
+        BlocProvider<AuthBloc>(create: (context) => AuthBloc()),
+        BlocProvider<DocumentBloc>(
+          create: (context) =>
+              DocumentBloc(userId: loggedInUserId)..add(FetchDocuments()),
+        ),
         if (!kIsWeb)
           BlocProvider<OnboardingBloc>(
             create: (context) => OnboardingBloc(),
           ),
-        BlocProvider<DocumentBloc>(
-          create: (context) =>
-              DocumentBloc(userId: userId)..add(FetchDocuments()),
-        ),
       ],
       child: const DocibryApp(),
     ),
@@ -50,11 +47,19 @@ class DocibryApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: StringConstants.appFullName,
+      title: 'Docibry',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
       ),
-      home: kIsWeb ? const HomePage() : Onboarding(),
+      home: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          if (state is AuthLoggedIn) {
+            return const HomePage();
+          } else {
+            return kIsWeb ? const AuthPage() : Onboarding();
+          }
+        },
+      ),
       routes: {
         homeRoute: (context) => const HomePage(),
         addDocRoute: (context) => const ManageDocumentPage(isAdd: true),
