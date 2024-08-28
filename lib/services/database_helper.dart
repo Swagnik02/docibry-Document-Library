@@ -1,3 +1,4 @@
+import 'package:docibry/models/user_model.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
@@ -43,18 +44,18 @@ class DatabaseHelper {
 
   // Get the store for a specific user
   Future<StoreRef<int, Map<String, dynamic>>> _getUserDocsStore(
-      String userId) async {
+      String userEmail) async {
     if (kIsWeb) {
       throw UnsupportedError(
           'Database operations are not supported on the web.');
     }
     final db = await database;
-    final userStore = intMapStoreFactory.store('users/$userId');
+    final userStore = intMapStoreFactory.store('users/$userEmail');
     return userStore;
   }
 
-  Future<void> insertDocument(String userId, DocModel doc) async {
-    final userStore = await _getUserDocsStore(userId);
+  Future<void> insertDocument(String userEmail, DocModel doc) async {
+    final userStore = await _getUserDocsStore(userEmail);
     final db = await database;
 
     // Check if the document already exists
@@ -70,12 +71,12 @@ class DatabaseHelper {
     }
   }
 
-  Future<List<DocModel>> getDocuments(String userId) async {
+  Future<List<DocModel>> getDocuments(String userEmail) async {
     if (kIsWeb) {
       throw UnsupportedError(
           'Database operations are not supported on the web.');
     }
-    final userStore = await _getUserDocsStore(userId);
+    final userStore = await _getUserDocsStore(userEmail);
     final db = await database;
     final finder = Finder(sortOrders: [SortOrder('uid')]);
     final recordSnapshots = await userStore.find(db, finder: finder);
@@ -86,16 +87,16 @@ class DatabaseHelper {
     }).toList();
   }
 
-  Future<void> updateDocument(String userId, DocModel doc) async {
-    final userStore = await _getUserDocsStore(userId);
+  Future<void> updateDocument(String userEmail, DocModel doc) async {
+    final userStore = await _getUserDocsStore(userEmail);
     final db = await database;
     final finder =
         Finder(filter: Filter.byKey(doc.uid)); // No conversion to int here
     await userStore.update(db, doc.toMap(), finder: finder);
   }
 
-  Future<void> deleteDocument(String userId, String uid) async {
-    final userStore = await _getUserDocsStore(userId);
+  Future<void> deleteDocument(String userEmail, String uid) async {
+    final userStore = await _getUserDocsStore(userEmail);
     final db = await database;
     final finder =
         Finder(filter: Filter.byKey(uid)); // No conversion to int here
@@ -125,5 +126,24 @@ class DatabaseHelper {
     final userStore = intMapStoreFactory.store('users');
     final recordSnapshots = await userStore.find(db);
     return recordSnapshots.map((snapshot) => snapshot.value).toList();
+  }
+
+  // Retrieve the logged-in user from the offline database
+  Future<UserModel?> getLoggedInUser() async {
+    try {
+      final userStore = intMapStoreFactory.store('users');
+      final db = await database;
+
+      // Assuming there's only one user logged in at a time
+      final recordSnapshots = await userStore.find(db);
+      if (recordSnapshots.isNotEmpty) {
+        return UserModel.fromMap(recordSnapshots.first.value);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Error retrieving logged-in user from offline database: $e');
+      return null;
+    }
   }
 }

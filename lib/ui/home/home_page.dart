@@ -1,5 +1,7 @@
 import 'dart:math';
+import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/constants/routes.dart';
+import 'package:docibry/ui/profile/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
@@ -36,7 +38,7 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // context.read<DocumentBloc>().add(FetchDocuments());
+    context.read<DocumentBloc>().add(FetchDocuments());
   }
 
   @override
@@ -72,11 +74,12 @@ class HomePageState extends State<HomePage> {
                   icon: const Icon(Icons.person),
                   onPressed: () async {
                     print(MediaQuery.sizeOf(context).toString());
-                    // Navigator.of(context).push(
-                    //   MaterialPageRoute(
-                    //     builder: (context) => const FirestoreDataPage(),
-                    //   ),
-                    // );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfilePage(),
+                      ),
+                    );
                   },
                 ),
               ],
@@ -99,6 +102,19 @@ class HomePageState extends State<HomePage> {
                 StringConstants.appName,
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfilePage(),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.person),
+                ),
+              ],
             ),
             body: const Center(child: Text(StringConstants.stringNoDataFound)),
             floatingActionButton: FloatingActionButton(

@@ -1,19 +1,20 @@
-import 'package:docibry/blocs/auth/auth_bloc.dart';
-import 'package:docibry/blocs/auth/auth_states.dart';
+import 'dart:developer';
+import 'package:docibry/blocs/auth/bloc/auth_bloc.dart';
+import 'package:docibry/blocs/auth/bloc/auth_event.dart';
+import 'package:docibry/blocs/auth/bloc/auth_state.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
-import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/blocs/onBoarding/onboarding_bloc.dart';
 import 'package:docibry/constants/routes.dart';
 import 'package:docibry/firebase_options.dart';
-import 'package:docibry/models/user_model.dart';
-import 'package:docibry/ui/Auth/auth_page.dart';
+import 'package:docibry/ui/auth/login_page.dart';
 import 'package:docibry/ui/document/manage_doc.dart';
 import 'package:docibry/ui/onBoarding/onboarding.dart';
+import 'package:docibry/ui/profile/profile_page.dart';
 import 'package:docibry/ui/shareDoc/share_doc_page.dart';
+import 'package:docibry/ui/home/home_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'ui/home/home_page.dart';
 import 'package:flutter/foundation.dart';
 
 void main() async {
@@ -25,10 +26,12 @@ void main() async {
   runApp(
     MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(create: (context) => AuthBloc()),
+        BlocProvider(
+          create: (context) => AuthBloc(),
+          child: AuthPage(),
+        ),
         BlocProvider<DocumentBloc>(
-          create: (context) =>
-              DocumentBloc(userId: loggedInUserId)..add(FetchDocuments()),
+          create: (context) => DocumentBloc(),
         ),
         if (!kIsWeb)
           BlocProvider<OnboardingBloc>(
@@ -46,25 +49,56 @@ class DocibryApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // supportedLocales: AppLocalizations.supportedLocales,
+      // localizationsDelegates: AppLocalizations.localizationsDelegates,
       debugShowCheckedModeBanner: false,
       title: 'Docibry',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
       ),
-      home: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          if (state is AuthLoggedIn) {
-            return const HomePage();
-          } else {
-            return kIsWeb ? const AuthPage() : Onboarding();
-          }
-        },
+      home: BlocProvider(
+        create: (context) => AuthBloc(),
+        child: AuthPage(),
       ),
       routes: {
         homeRoute: (context) => const HomePage(),
         addDocRoute: (context) => const ManageDocumentPage(isAdd: true),
         viewDocRoute: (context) => const ManageDocumentPage(isAdd: false),
         shareDocRoute: (context) => const ShareDocumentPage(),
+      },
+    );
+  }
+}
+
+class AuthPage extends StatelessWidget {
+  const AuthPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    context.read<AuthBloc>().add(const AuthEventInitialize());
+
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthStateLoading && state.isLoading) {
+          // Display a loading indicator or screen when loading
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(state.loadingText ?? 'Please wait a moment')),
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state is AuthStateLoggedIn) {
+          return const HomePage();
+        } else if (state is AuthStateLoggedOut) {
+          return kIsWeb ? LoginPage() : Onboarding();
+        } else if (state is AuthStateRegistering) {
+          return const LoginPage();
+        } else if (state is AuthStateLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else {
+          return ProfilePage();
+        }
       },
     );
   }
