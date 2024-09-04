@@ -1,11 +1,11 @@
 import 'dart:developer';
 import 'package:bloc/bloc.dart';
+import 'package:docibry/blocs/document/document_event.dart';
+import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/models/document_model.dart';
 import 'package:docibry/repositories/database_service.dart';
 import 'package:docibry/services/user_data_service.dart';
 import 'package:flutter/foundation.dart';
-import 'document_event.dart';
-import 'document_state.dart';
 
 class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   final DatabaseService _databaseService = DatabaseService();
