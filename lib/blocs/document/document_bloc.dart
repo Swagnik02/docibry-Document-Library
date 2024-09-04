@@ -15,10 +15,10 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   DocumentBloc() : super(DocumentInitial()) {
     _initializeUserEmail();
 
-    on<GetDocument>(_handleGetDocument);
-    on<AddDocument>(_handleAddDocument);
-    on<UpdateDocument>(_handleUpdateDocument);
-    on<DeleteDocument>(_handleDeleteDocument);
+    on<GetDocument>(_onGetDocument);
+    on<AddDocument>(_onAddDocument);
+    on<UpdateDocument>(_onUpdateDocument);
+    on<DeleteDocument>(_onDeleteDocument);
   }
 
   Future<void> _initializeUserEmail() async {
@@ -35,7 +35,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     }
   }
 
-  Future<void> _handleGetDocument(
+  Future<void> _onGetDocument(
       GetDocument event, Emitter<DocumentState> emit) async {
     if (_userEmail == null) {
       emit(const DocumentError(error: 'No user email provided.'));
@@ -56,7 +56,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     }
   }
 
-  Future<void> _handleAddDocument(
+  Future<void> _onAddDocument(
       AddDocument event, Emitter<DocumentState> emit) async {
     if (_userEmail == null) {
       emit(const DocumentError(error: 'No user email provided.'));
@@ -81,7 +81,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     }
   }
 
-  Future<void> _handleUpdateDocument(
+  Future<void> _onUpdateDocument(
       UpdateDocument event, Emitter<DocumentState> emit) async {
     if (_userEmail == null) {
       emit(const DocumentError(error: 'No user email provided.'));
@@ -97,7 +97,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     }
   }
 
-  Future<void> _handleDeleteDocument(
+  Future<void> _onDeleteDocument(
       DeleteDocument event, Emitter<DocumentState> emit) async {
     if (_userEmail == null) {
       emit(const DocumentError(error: 'No user email provided.'));
