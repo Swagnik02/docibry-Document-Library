@@ -3,7 +3,6 @@ import 'package:bloc/bloc.dart';
 import 'package:docibry/models/document_model.dart';
 import 'package:docibry/repositories/database_service.dart';
 import 'package:docibry/services/user_data_service.dart';
-
 import 'package:flutter/foundation.dart';
 import 'document_event.dart';
 import 'document_state.dart';
@@ -26,7 +25,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     try {
       _userEmail = await _userDataService.getUserEmail();
       if (_userEmail == null) {
-        emit(DocumentError(error: 'No user email available.'));
+        emit(const DocumentError(error: 'No user email available.'));
       } else {
         await _databaseService.init();
       }
@@ -39,7 +38,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   Future<void> _handleGetDocument(
       GetDocument event, Emitter<DocumentState> emit) async {
     if (_userEmail == null) {
-      emit(DocumentError(error: 'No user email provided.'));
+      emit(const DocumentError(error: 'No user email provided.'));
       return;
     }
 
@@ -60,7 +59,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   Future<void> _handleAddDocument(
       AddDocument event, Emitter<DocumentState> emit) async {
     if (_userEmail == null) {
-      emit(DocumentError(error: 'No user email provided.'));
+      emit(const DocumentError(error: 'No user email provided.'));
       return;
     }
 
@@ -85,7 +84,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   Future<void> _handleUpdateDocument(
       UpdateDocument event, Emitter<DocumentState> emit) async {
     if (_userEmail == null) {
-      emit(DocumentError(error: 'No user email provided.'));
+      emit(const DocumentError(error: 'No user email provided.'));
       return;
     }
 
@@ -101,7 +100,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   Future<void> _handleDeleteDocument(
       DeleteDocument event, Emitter<DocumentState> emit) async {
     if (_userEmail == null) {
-      emit(DocumentError(error: 'No user email provided.'));
+      emit(const DocumentError(error: 'No user email provided.'));
       return;
     }
 

@@ -23,9 +23,7 @@ class LocalDbService {
   }
 
   Future<Database> get _db async {
-    if (_database == null) {
-      _database = await _initDatabaseLocalDb();
-    }
+    _database ??= await _initDatabaseLocalDb();
     return _database!;
   }
 
@@ -76,7 +74,7 @@ class LocalDbService {
   }
 
   Future<List<String>> getTableNamesLocalDb() async {
-    return ['users']; // Simulate primary store
+    return ['users'];
   }
 
   Future<List<Map<String, dynamic>>> getTableDataLocalDb(
