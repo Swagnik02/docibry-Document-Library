@@ -1,4 +1,4 @@
-const loginRoute = '/login/';
+const authRoute = '/auth/';
 const registerRoute = '/register/';
 const homeRoute = '/home/';
 const addDocRoute = '/addDocument/';

@@ -45,6 +45,7 @@ class DocibryApp extends StatelessWidget {
       ),
       home: AuthPage(),
       routes: {
+        authRoute: (context) => AuthPage(),
         homeRoute: (context) => const HomePage(),
         addDocRoute: (context) => const ManageDocumentPage(isAdd: true),
         viewDocRoute: (context) => const ManageDocumentPage(isAdd: false),

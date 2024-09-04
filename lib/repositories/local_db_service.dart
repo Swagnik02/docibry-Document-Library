@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:docibry/models/user_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
@@ -133,5 +135,24 @@ class LocalDbService {
     final store = intMapStoreFactory.store(tableName);
     final recordSnapshots = await store.find(db);
     return recordSnapshots.map((snapshot) => snapshot.value).toList();
+  }
+
+  Future<void> logout() async {
+    // Clear all user-related data
+    try {
+      // Delete logged-in user data
+      await deleteLoggedInUser();
+
+      // Optionally, clear all user documents from local DB if needed
+      final db = await _db;
+      final userTableNames = await getTableNamesLocalDb();
+      for (var tableName in userTableNames) {
+        final store = intMapStoreFactory.store(tableName);
+        await store.delete(db, finder: Finder());
+      }
+      log('Data Cleared');
+    } catch (e) {
+      print('Error during logout and clearing local database: $e');
+    }
   }
 }
