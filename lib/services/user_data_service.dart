@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:docibry/services/database_helper.dart';
+import 'package:docibry/repositories/local_db_service.dart';
 
 class UserDataService {
   final LocalDbService _dbHelper = LocalDbService();
@@ -16,7 +16,7 @@ class UserDataService {
     } catch (firebaseError) {
       // If an error occurs, fallback to retrieving from the offline database
       try {
-        final offlineUser = await _dbHelper.getLoggedInUser();
+        final offlineUser = await _dbHelper.getLoggedInUserLocalDb();
         return offlineUser?.email;
       } catch (dbError) {
         // Handle potential errors with the offline database as well
