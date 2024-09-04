@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/constants/routes.dart';
-import 'package:docibry/ui/home/dataTest/firestore_data_page.dart';
 import 'package:docibry/ui/profile/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -71,15 +70,6 @@ class HomePageState extends State<HomePage> {
               title:
                   CustomSearchBar(onSearchQueryChanged: _onSearchQueryChanged),
               actions: [
-                IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => LocalDatabasePage()),
-                      );
-                    },
-                    icon: Icon(Icons.data_array)),
                 IconButton(
                   icon: const Icon(Icons.person),
                   onPressed: () async {

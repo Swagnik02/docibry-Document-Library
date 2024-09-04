@@ -20,7 +20,7 @@ class DatabaseService {
     if (kIsWeb) {
       return await _firestoreDbService.getDocumentFromFirestore(userUid);
     } else {
-      return await _localDbService.getDocumentsLocalDb(userUid);
+      return await _localDbService.getDocumentsLocalDb();
     }
   }
 
@@ -28,7 +28,7 @@ class DatabaseService {
     if (kIsWeb) {
       await _firestoreDbService.addDocumentFromFirestore(userUid, doc);
     } else {
-      await _localDbService.addDocumentLocalDb(userUid, doc);
+      await _localDbService.addDocumentLocalDb(doc);
       if (await _isInternetAvailable()) {
         await _firestoreDbService.addDocumentFromFirestore(userUid, doc);
       }
@@ -39,7 +39,7 @@ class DatabaseService {
     if (kIsWeb) {
       await _firestoreDbService.updateDocumentFromFirestore(userUid, doc);
     } else {
-      await _localDbService.updateDocumentLocalDb(userUid, doc);
+      await _localDbService.updateDocumentLocalDb(doc);
       if (await _isInternetAvailable()) {
         await _firestoreDbService.updateDocumentFromFirestore(userUid, doc);
       }
@@ -50,7 +50,7 @@ class DatabaseService {
     if (kIsWeb) {
       await _firestoreDbService.deleteDocumentFromFirestore(userUid, docUid);
     } else {
-      await _localDbService.deleteDocumentLocalDb(userUid, docUid);
+      await _localDbService.deleteDocumentLocalDb(docUid);
       if (await _isInternetAvailable()) {
         await _firestoreDbService.deleteDocumentFromFirestore(userUid, docUid);
       }
@@ -64,18 +64,18 @@ class DatabaseService {
       if (await _isInternetAvailable()) {
         final firestoreDocs =
             await _firestoreDbService.getDocumentFromFirestore(userUid);
-        final localDocs = await _localDbService.getDocumentsLocalDb(userUid);
+        final localDocs = await _localDbService.getDocumentsLocalDb();
 
         final newDocs = firestoreDocs
             .where((doc) => !localDocs.any((local) => local.uid == doc.uid));
         for (var doc in newDocs) {
-          await _localDbService.addDocumentLocalDb(userUid, doc);
+          await _localDbService.addDocumentLocalDb(doc);
         }
 
         final removedDocs = localDocs.where((doc) =>
             !firestoreDocs.any((firestoreDoc) => firestoreDoc.uid == doc.uid));
         for (var doc in removedDocs) {
-          await _localDbService.deleteDocumentLocalDb(userUid, doc.uid);
+          await _localDbService.deleteDocumentLocalDb(doc.uid);
         }
       }
     } catch (e) {

@@ -1,11 +1,11 @@
 import 'dart:developer';
-
-import 'package:docibry/models/user_model.dart';
+import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:docibry/models/document_model.dart';
+import 'package:docibry/models/user_model.dart';
 
 class LocalDbService {
   static final LocalDbService _instance = LocalDbService._internal();
@@ -29,65 +29,51 @@ class LocalDbService {
     return _database!;
   }
 
-  Future<StoreRef<int, Map<String, dynamic>>> _getUserDocsStoreLocalDb(
-      String userEmail) async {
+  Future<StoreRef<String, Map<String, dynamic>>> _getDocsStore() async {
     final db = await _db;
-    return intMapStoreFactory.store('users/$userEmail');
+    return stringMapStoreFactory.store('docs');
   }
 
-  Future<void> addDocumentLocalDb(String userEmail, DocModel doc) async {
-    final userStore = await _getUserDocsStoreLocalDb(userEmail);
+  Future<void> addDocumentLocalDb(DocModel doc) async {
+    final docsStore = await _getDocsStore();
     final db = await _db;
-
-    final finder = Finder(filter: Filter.byKey(doc.uid));
-    final existingDocs = await userStore.find(db, finder: finder);
-
-    if (existingDocs.isEmpty) {
-      await userStore.add(db, doc.toMap());
-    } else {
-      await userStore.update(db, doc.toMap(), finder: finder);
-    }
+    await docsStore.record(doc.uid).put(db, doc.toMap());
   }
 
-  Future<List<DocModel>> getDocumentsLocalDb(String userEmail) async {
-    final userStore = await _getUserDocsStoreLocalDb(userEmail);
+  Future<List<DocModel>> getDocumentsLocalDb() async {
+    final docsStore = await _getDocsStore();
     final db = await _db;
     final finder = Finder(sortOrders: [SortOrder('uid')]);
-    final recordSnapshots = await userStore.find(db, finder: finder);
+    final recordSnapshots = await docsStore.find(db, finder: finder);
     log('Loading data from local database');
-
     return recordSnapshots.map(
       (snapshot) {
         final doc = DocModel.fromMap(snapshot.value);
-        return doc.copyWith(uid: snapshot.key.toString());
+        return doc.copyWith(uid: snapshot.key);
       },
     ).toList();
   }
 
-  Future<void> updateDocumentLocalDb(String userEmail, DocModel doc) async {
-    final userStore = await _getUserDocsStoreLocalDb(userEmail);
+  Future<void> updateDocumentLocalDb(DocModel doc) async {
+    final docsStore = await _getDocsStore();
     final db = await _db;
-    final finder = Finder(filter: Filter.byKey(doc.uid));
-    await userStore.update(db, doc.toMap(), finder: finder);
+    await docsStore.record(doc.uid).put(db, doc.toMap());
   }
 
-  Future<void> deleteDocumentLocalDb(String userEmail, String uid) async {
-    final userStore = await _getUserDocsStoreLocalDb(userEmail);
+  Future<void> deleteDocumentLocalDb(String uid) async {
+    final docsStore = await _getDocsStore();
     final db = await _db;
-    final finder = Finder(filter: Filter.byKey(uid));
-    await userStore.delete(db, finder: finder);
+    await docsStore.record(uid).delete(db);
   }
 
-  // Handle LoggedInData
-  Future<StoreRef<int, Map<String, dynamic>>> _getLoggedInDataStore() async {
+  Future<StoreRef<int, Map<String, dynamic>>> _getLoggedInUserStore() async {
     final db = await _db;
-    return intMapStoreFactory.store('LoggedInData');
+    return intMapStoreFactory.store('loggedInUserData');
   }
 
   Future<void> saveLoggedInUser(UserModel user) async {
-    final store = await _getLoggedInDataStore();
+    final store = await _getLoggedInUserStore();
     final db = await _db;
-
     final existingUser = await store.findFirst(db);
     if (existingUser == null) {
       await store.add(db, user.toMap());
@@ -99,9 +85,8 @@ class LocalDbService {
 
   Future<UserModel?> getLoggedInUser() async {
     try {
-      final store = await _getLoggedInDataStore();
+      final store = await _getLoggedInUserStore();
       final db = await _db;
-
       final recordSnapshots = await store.find(db);
       if (recordSnapshots.isNotEmpty) {
         return UserModel.fromMap(recordSnapshots.first.value);
@@ -109,15 +94,14 @@ class LocalDbService {
         return null;
       }
     } catch (e) {
-      print('Error retrieving logged-in user from offline database: $e');
+      log('Error retrieving logged-in user from offline database: $e');
       return null;
     }
   }
 
   Future<void> deleteLoggedInUser() async {
-    final store = await _getLoggedInDataStore();
+    final store = await _getLoggedInUserStore();
     final db = await _db;
-
     final existingUser = await store.findFirst(db);
     if (existingUser != null) {
       await store.delete(db,
@@ -126,36 +110,70 @@ class LocalDbService {
   }
 
   Future<List<String>> getTableNamesLocalDb() async {
-    return ['users', 'LoggedInData'];
+    return ['docs', 'loggedInUserData'];
   }
 
   Future<List<Map<String, dynamic>>> getTableDataLocalDb(
       String tableName) async {
-    if (tableName != 'users' && tableName != 'LoggedInData') {
+    if (tableName != 'docs' && tableName != 'loggedInUserData') {
       throw Exception('Table $tableName does not exist.');
     }
     final db = await _db;
-    final store = intMapStoreFactory.store(tableName);
+    final store = tableName == 'docs'
+        ? stringMapStoreFactory.store(tableName)
+        : intMapStoreFactory.store(tableName);
     final recordSnapshots = await store.find(db);
     return recordSnapshots.map((snapshot) => snapshot.value).toList();
   }
 
-  Future<void> logout(String userEmail, String uid) async {
-    // Clear all user-related data
+  Future<void> logout(String userUid, String uid) async {
     try {
-      // Delete logged-in user data
       await deleteLoggedInUser();
-      await deleteDocumentLocalDb(userEmail, uid);
-      // Optionally, clear all user documents from local DB if needed
+      await deleteDocumentLocalDb(uid);
       final db = await _db;
       final userTableNames = await getTableNamesLocalDb();
       for (var tableName in userTableNames) {
-        final store = intMapStoreFactory.store(tableName);
+        final store = tableName == 'docs'
+            ? stringMapStoreFactory.store(tableName)
+            : intMapStoreFactory.store(tableName);
         await store.delete(db, finder: Finder());
       }
       log('Data Cleared');
     } catch (e) {
-      print('Error during logout and clearing local database: $e');
+      log('Error during logout and clearing local database: $e');
+    }
+  }
+
+  Future<void> saveDbFileToDownloads() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final dbPath = join(dir.path, 'documents.db');
+      final dbFile = File(dbPath);
+      final downloadsDir = Directory('/storage/emulated/0/Download');
+      if (!await downloadsDir.exists()) {
+        await downloadsDir.create(recursive: true);
+      }
+      final downloadFilePath = join(downloadsDir.path, 'documents.db');
+      await dbFile.copy(downloadFilePath);
+      log('Database file copied to Downloads folder');
+    } catch (e) {
+      log('Error copying database file: $e');
+    }
+  }
+
+  Future<void> deleteDatabaseFile() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final dbPath = join(dir.path, 'documents.db');
+      final dbFile = File(dbPath);
+      if (await dbFile.exists()) {
+        await dbFile.delete();
+        log('Database file deleted successfully');
+      } else {
+        log('Database file does not exist');
+      }
+    } catch (e) {
+      log('Error deleting database file: $e');
     }
   }
 }
