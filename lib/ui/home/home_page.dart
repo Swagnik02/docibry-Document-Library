@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/constants/routes.dart';
+import 'package:docibry/ui/home/dataTest/firestore_data_page.dart';
 import 'package:docibry/ui/profile/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -72,13 +73,16 @@ class HomePageState extends State<HomePage> {
               actions: [
                 IconButton(
                     onPressed: () {
-                      print(filteredDocs.length);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => LocalDatabasePage()),
+                      );
                     },
-                    icon: Icon(Icons.check)),
+                    icon: Icon(Icons.data_array)),
                 IconButton(
                   icon: const Icon(Icons.person),
                   onPressed: () async {
-                    print(MediaQuery.sizeOf(context).toString());
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => ProfilePage()),

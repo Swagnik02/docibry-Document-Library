@@ -1,72 +1,60 @@
-// import 'package:docibry/models/document_model.dart';
-// import 'package:docibry/models/user_model.dart';
+import 'package:docibry/repositories/local_db_service.dart';
+import 'package:flutter/material.dart';
 
-// import 'package:docibry/services/firestore_helper.dart';
-// import 'package:docibry/ui/home/doc_card.dart';
-// import 'package:flutter/material.dart';
-// import 'package:docibry/constants/string_constants.dart';
+class LocalDatabasePage extends StatefulWidget {
+  @override
+  _LocalDatabasePageState createState() => _LocalDatabasePageState();
+}
 
-// class FirestoreDataPage extends StatefulWidget {
-//   const FirestoreDataPage({super.key});
+class _LocalDatabasePageState extends State<LocalDatabasePage> {
+  Map<String, List<Map<String, dynamic>>> _databaseData = {};
 
-//   @override
-//   _FirestoreDataPageState createState() => _FirestoreDataPageState();
-// }
+  @override
+  void initState() {
+    super.initState();
+    _loadDatabaseData();
+  }
 
-// class _FirestoreDataPageState extends State<FirestoreDataPage> {
-//   List<DocModel> documents = [];
-//   bool isLoading = true;
-//   String? errorMessage;
+  Future<void> _loadDatabaseData() async {
+    final dbService = LocalDbService();
+    await dbService.initLocalDb();
+    final tableNames = await dbService.getTableNamesLocalDb();
 
-//   @override
-//   void initState() {
-//     super.initState();
-//     _fetchDocuments();
-//   }
+    Map<String, List<Map<String, dynamic>>> dbData = {};
 
-//   void _fetchDocuments() async {
-//     try {
-//       documents = await FirestoreDbService.getDocument(loggedInUserId);
-//       setState(() {
-//         isLoading = false;
-//       });
-//     } catch (e) {
-//       setState(() {
-//         isLoading = false;
-//         errorMessage = e.toString();
-//       });
-//     }
-//   }
+    for (String tableName in tableNames) {
+      final tableData = await dbService.getTableDataLocalDb(tableName);
+      dbData[tableName] = tableData;
+    }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text(
-//           'Firestore Data',
-//           style: Theme.of(context).textTheme.headlineLarge,
-//         ),
-//       ),
-//       body: isLoading
-//           ? const Center(child: CircularProgressIndicator())
-//           : errorMessage != null
-//               ? Center(child: Text('Error: $errorMessage'))
-//               : _docs(documents),
-//     );
-//   }
+    setState(() {
+      _databaseData = dbData;
+    });
+  }
 
-//   Expanded _docs(List<DocModel> filteredDocs) {
-//     return Expanded(
-//       child: filteredDocs.isEmpty
-//           ? const Center(
-//               child: Text(StringConstants.stringNoDataFound),
-//             )
-//           : ListView.builder(
-//               itemCount: filteredDocs.length,
-//               itemBuilder: (context, index) {
-//                 return DocCard(docModel: filteredDocs[index]);
-//               },
-//             ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Local Database Data'),
+      ),
+      body: _databaseData.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : ListView(
+              children: _databaseData.entries.map((entry) {
+                final tableName = entry.key;
+                final tableData = entry.value;
+
+                return ExpansionTile(
+                  title: Text(tableName),
+                  children: tableData.map((data) {
+                    return ListTile(
+                      title: Text(data.toString()),
+                    );
+                  }).toList(),
+                );
+              }).toList(),
+            ),
+    );
+  }
+}

@@ -24,4 +24,25 @@ class UserDataService {
       }
     }
   }
+
+  Future<String?> getUserUid() async {
+    try {
+      // Attempt to get the email from FirebaseAuth
+      final User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        return user.uid;
+      } else {
+        throw Exception('No user logged in via Firebase');
+      }
+    } catch (firebaseError) {
+      // If an error occurs, fallback to retrieving from the offline database
+      try {
+        final offlineUser = await _dbHelper.getLoggedInUser();
+        return offlineUser?.userEmail;
+      } catch (dbError) {
+        // Handle potential errors with the offline database as well
+        return null;
+      }
+    }
+  }
 }

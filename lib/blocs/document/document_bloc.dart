@@ -10,10 +10,10 @@ import 'package:flutter/foundation.dart';
 class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   final DatabaseService _databaseService = DatabaseService();
   final UserDataService _userDataService = UserDataService();
-  String? _userEmail;
+  String? _userUid;
 
   DocumentBloc() : super(DocumentInitial()) {
-    _initializeUserEmail();
+    _initializeUserUid();
 
     on<GetDocument>(_onGetDocument);
     on<AddDocument>(_onAddDocument);
@@ -21,10 +21,12 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     on<DeleteDocument>(_onDeleteDocument);
   }
 
-  Future<void> _initializeUserEmail() async {
+  Future<void> _initializeUserUid() async {
     try {
-      _userEmail = await _userDataService.getUserEmail();
-      if (_userEmail == null) {
+      _userUid = await _userDataService.getUserUid();
+
+      log(_userUid.toString());
+      if (_userUid == null) {
         emit(const DocumentError(error: 'No user email available.'));
       } else {
         await _databaseService.init();
@@ -38,7 +40,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   Future<void> _onGetDocument(
       GetDocument event, Emitter<DocumentState> emit) async {
     log('_onGetDocument');
-    if (_userEmail == null) {
+    if (_userUid == null) {
       emit(const DocumentError(error: 'No user email provided.'));
       return;
     }
@@ -46,7 +48,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     emit(DocumentLoading());
 
     try {
-      final documents = await _databaseService.getDocuments(_userEmail!);
+      final documents = await _databaseService.getDocuments(_userUid!);
       emit(DocumentLoaded(documents: documents));
 
       if (!kIsWeb) {
@@ -59,7 +61,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
 
   Future<void> _onAddDocument(
       AddDocument event, Emitter<DocumentState> emit) async {
-    if (_userEmail == null) {
+    if (_userUid == null) {
       emit(const DocumentError(error: 'No user email provided.'));
       return;
     }
@@ -74,8 +76,8 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     );
 
     try {
-      await _databaseService.addDocument(_userEmail!, doc);
-      final documents = await _databaseService.getDocuments(_userEmail!);
+      await _databaseService.addDocument(_userUid!, doc);
+      final documents = await _databaseService.getDocuments(_userUid!);
       emit(DocumentLoaded(documents: documents));
     } catch (e) {
       emit(DocumentError(error: e.toString()));
@@ -84,14 +86,14 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
 
   Future<void> _onUpdateDocument(
       UpdateDocument event, Emitter<DocumentState> emit) async {
-    if (_userEmail == null) {
+    if (_userUid == null) {
       emit(const DocumentError(error: 'No user email provided.'));
       return;
     }
 
     try {
-      await _databaseService.updateDocument(_userEmail!, event.document);
-      final documents = await _databaseService.getDocuments(_userEmail!);
+      await _databaseService.updateDocument(_userUid!, event.document);
+      final documents = await _databaseService.getDocuments(_userUid!);
       emit(DocumentLoaded(documents: documents));
     } catch (e) {
       emit(DocumentError(error: e.toString()));
@@ -100,14 +102,14 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
 
   Future<void> _onDeleteDocument(
       DeleteDocument event, Emitter<DocumentState> emit) async {
-    if (_userEmail == null) {
+    if (_userUid == null) {
       emit(const DocumentError(error: 'No user email provided.'));
       return;
     }
 
     try {
-      await _databaseService.deleteDocument(_userEmail!, event.uid);
-      final documents = await _databaseService.getDocuments(_userEmail!);
+      await _databaseService.deleteDocument(_userUid!, event.uid);
+      final documents = await _databaseService.getDocuments(_userUid!);
       emit(DocumentLoaded(documents: documents));
     } catch (e) {
       emit(DocumentError(error: e.toString()));
@@ -116,8 +118,8 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
 
   Future<void> _syncWithFirestoreInBackground() async {
     try {
-      if (_userEmail != null) {
-        await _databaseService.syncLocalWithFirestore(_userEmail!);
+      if (_userUid != null) {
+        await _databaseService.syncLocalWithFirestore(_userUid!);
       }
     } catch (e) {
       log('Error syncing with Firestore: $e');

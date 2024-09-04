@@ -16,68 +16,66 @@ class DatabaseService {
     }
   }
 
-  Future<List<DocModel>> getDocuments(String userEmail) async {
+  Future<List<DocModel>> getDocuments(String userUid) async {
     if (kIsWeb) {
-      return await _firestoreDbService.getDocumentFromFirestore(userEmail);
+      return await _firestoreDbService.getDocumentFromFirestore(userUid);
     } else {
-      return await _localDbService.getDocumentsLocalDb(userEmail);
+      return await _localDbService.getDocumentsLocalDb(userUid);
     }
   }
 
-  Future<void> addDocument(String userEmail, DocModel doc) async {
+  Future<void> addDocument(String userUid, DocModel doc) async {
     if (kIsWeb) {
-      await _firestoreDbService.addDocumentFromFirestore(userEmail, doc);
+      await _firestoreDbService.addDocumentFromFirestore(userUid, doc);
     } else {
-      await _localDbService.addDocumentLocalDb(userEmail, doc);
+      await _localDbService.addDocumentLocalDb(userUid, doc);
       if (await _isInternetAvailable()) {
-        await _firestoreDbService.addDocumentFromFirestore(userEmail, doc);
+        await _firestoreDbService.addDocumentFromFirestore(userUid, doc);
       }
     }
   }
 
-  Future<void> updateDocument(String userEmail, DocModel doc) async {
+  Future<void> updateDocument(String userUid, DocModel doc) async {
     if (kIsWeb) {
-      await _firestoreDbService.updateDocumentFromFirestore(userEmail, doc);
+      await _firestoreDbService.updateDocumentFromFirestore(userUid, doc);
     } else {
-      await _localDbService.updateDocumentLocalDb(userEmail, doc);
+      await _localDbService.updateDocumentLocalDb(userUid, doc);
       if (await _isInternetAvailable()) {
-        await _firestoreDbService.updateDocumentFromFirestore(userEmail, doc);
+        await _firestoreDbService.updateDocumentFromFirestore(userUid, doc);
       }
     }
   }
 
-  Future<void> deleteDocument(String userEmail, String uid) async {
+  Future<void> deleteDocument(String userUid, String docUid) async {
     if (kIsWeb) {
-      await _firestoreDbService.deleteDocumentFromFirestore(userEmail, uid);
+      await _firestoreDbService.deleteDocumentFromFirestore(userUid, docUid);
     } else {
-      await _localDbService.deleteDocumentLocalDb(userEmail, uid);
+      await _localDbService.deleteDocumentLocalDb(userUid, docUid);
       if (await _isInternetAvailable()) {
-        await _firestoreDbService.deleteDocumentFromFirestore(userEmail, uid);
+        await _firestoreDbService.deleteDocumentFromFirestore(userUid, docUid);
       }
     }
   }
 
-  Future<void> syncLocalWithFirestore(String userEmail) async {
-    if (kIsWeb) return; // Syncing not applicable for web, implement if needed
+  Future<void> syncLocalWithFirestore(String userUid) async {
+    if (kIsWeb) return;
 
     try {
       if (await _isInternetAvailable()) {
         final firestoreDocs =
-            await _firestoreDbService.getDocumentFromFirestore(userEmail);
-        final localDocs = await _localDbService.getDocumentsLocalDb(userEmail);
+            await _firestoreDbService.getDocumentFromFirestore(userUid);
+        final localDocs = await _localDbService.getDocumentsLocalDb(userUid);
 
-        // Add new documents to local storage
         final newDocs = firestoreDocs
             .where((doc) => !localDocs.any((local) => local.uid == doc.uid));
         for (var doc in newDocs) {
-          await _localDbService.addDocumentLocalDb(userEmail, doc);
+          await _localDbService.addDocumentLocalDb(userUid, doc);
         }
 
-        // Remove documents from local storage that are no longer in Firestore
         final removedDocs = localDocs.where((doc) =>
             !firestoreDocs.any((firestoreDoc) => firestoreDoc.uid == doc.uid));
         for (var doc in removedDocs) {
-          await _localDbService.deleteDocumentLocalDb(userEmail, doc.uid);
+          await _localDbService.deleteDocumentLocalDb(userUid, doc.uid);
         }
       }
     } catch (e) {
@@ -87,7 +85,9 @@ class DatabaseService {
 
   Future<bool> _isInternetAvailable() async {
     try {
-      final response = await http.get(Uri.parse('https://www.google.com'));
+      final response = await http.get(
+        Uri.parse('https://www.google.com'),
+      );
       return response.statusCode == 200;
     } catch (_) {
       return false;
