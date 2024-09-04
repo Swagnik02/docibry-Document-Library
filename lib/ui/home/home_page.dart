@@ -8,9 +8,9 @@ import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/models/document_model.dart';
-import 'doc_card.dart';
-import 'doc_category_filter_chip.dart';
-import 'search_bar.dart';
+import 'widgets/doc_card.dart';
+import 'widgets/doc_category_filter_chip.dart';
+import 'widgets/search_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
