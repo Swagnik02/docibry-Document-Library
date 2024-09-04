@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:docibry/models/document_model.dart';
 
@@ -7,6 +9,8 @@ class FirestoreDbService {
   // Fetch documents from Firestore for a specific user
   Future<List<DocModel>> getDocumentFromFirestore(String userEmail) async {
     try {
+      log('Loading data from firebase');
+
       DocumentReference userDocRef =
           _firestore.collection('users').doc(userEmail.toString());
       QuerySnapshot querySnapshot = await userDocRef.collection('docs').get();

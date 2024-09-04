@@ -18,6 +18,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   // Initialize local database
   if (!kIsWeb) {
     final localDbService = LocalDbService();

@@ -71,14 +71,17 @@ class HomePageState extends State<HomePage> {
                   CustomSearchBar(onSearchQueryChanged: _onSearchQueryChanged),
               actions: [
                 IconButton(
+                    onPressed: () {
+                      print(filteredDocs.length);
+                    },
+                    icon: Icon(Icons.check)),
+                IconButton(
                   icon: const Icon(Icons.person),
                   onPressed: () async {
                     print(MediaQuery.sizeOf(context).toString());
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => ProfilePage(),
-                      ),
+                      MaterialPageRoute(builder: (context) => ProfilePage()),
                     );
                   },
                 ),

@@ -37,10 +37,10 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<void> _logout() async {
+  Future<void> _logout(String userEmail, String uid) async {
     try {
       await _auth.signOut();
-      LocalDbService().logout();
+      LocalDbService().logout(userEmail, uid);
       Navigator.of(context).pushReplacementNamed('/auth/');
     } catch (e) {
       // Handle logout error
@@ -71,7 +71,9 @@ class _ProfilePageState extends State<ProfilePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: _logout,
+            onPressed: () {
+              _logout(user.email.toString(), user.uid);
+            },
           ),
         ],
       ),

@@ -54,11 +54,14 @@ class LocalDbService {
     final db = await _db;
     final finder = Finder(sortOrders: [SortOrder('uid')]);
     final recordSnapshots = await userStore.find(db, finder: finder);
+    log('Loading data from local database');
 
-    return recordSnapshots.map((snapshot) {
-      final doc = DocModel.fromMap(snapshot.value);
-      return doc.copyWith(uid: snapshot.key.toString());
-    }).toList();
+    return recordSnapshots.map(
+      (snapshot) {
+        final doc = DocModel.fromMap(snapshot.value);
+        return doc.copyWith(uid: snapshot.key.toString());
+      },
+    ).toList();
   }
 
   Future<void> updateDocumentLocalDb(String userEmail, DocModel doc) async {
@@ -137,12 +140,12 @@ class LocalDbService {
     return recordSnapshots.map((snapshot) => snapshot.value).toList();
   }
 
-  Future<void> logout() async {
+  Future<void> logout(String userEmail, String uid) async {
     // Clear all user-related data
     try {
       // Delete logged-in user data
       await deleteLoggedInUser();
-
+      await deleteDocumentLocalDb(userEmail, uid);
       // Optionally, clear all user documents from local DB if needed
       final db = await _db;
       final userTableNames = await getTableNamesLocalDb();
