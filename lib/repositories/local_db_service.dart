@@ -73,27 +73,31 @@ class LocalDbService {
     await userStore.delete(db, finder: finder);
   }
 
-  Future<List<String>> getTableNamesLocalDb() async {
-    return ['users'];
-  }
-
-  Future<List<Map<String, dynamic>>> getTableDataLocalDb(
-      String tableName) async {
-    if (tableName != 'users') {
-      throw Exception('Table $tableName does not exist.');
-    }
+  // Handle LoggedInData
+  Future<StoreRef<int, Map<String, dynamic>>> _getLoggedInDataStore() async {
     final db = await _db;
-    final userStore = intMapStoreFactory.store('users');
-    final recordSnapshots = await userStore.find(db);
-    return recordSnapshots.map((snapshot) => snapshot.value).toList();
+    return intMapStoreFactory.store('LoggedInData');
   }
 
-  Future<UserModel?> getLoggedInUserLocalDb() async {
+  Future<void> saveLoggedInUser(UserModel user) async {
+    final store = await _getLoggedInDataStore();
+    final db = await _db;
+
+    final existingUser = await store.findFirst(db);
+    if (existingUser == null) {
+      await store.add(db, user.toMap());
+    } else {
+      await store.update(db, user.toMap(),
+          finder: Finder(filter: Filter.byKey(existingUser.key)));
+    }
+  }
+
+  Future<UserModel?> getLoggedInUser() async {
     try {
-      final userStore = intMapStoreFactory.store('users');
+      final store = await _getLoggedInDataStore();
       final db = await _db;
 
-      final recordSnapshots = await userStore.find(db);
+      final recordSnapshots = await store.find(db);
       if (recordSnapshots.isNotEmpty) {
         return UserModel.fromMap(recordSnapshots.first.value);
       } else {
@@ -103,5 +107,31 @@ class LocalDbService {
       print('Error retrieving logged-in user from offline database: $e');
       return null;
     }
+  }
+
+  Future<void> deleteLoggedInUser() async {
+    final store = await _getLoggedInDataStore();
+    final db = await _db;
+
+    final existingUser = await store.findFirst(db);
+    if (existingUser != null) {
+      await store.delete(db,
+          finder: Finder(filter: Filter.byKey(existingUser.key)));
+    }
+  }
+
+  Future<List<String>> getTableNamesLocalDb() async {
+    return ['users', 'LoggedInData'];
+  }
+
+  Future<List<Map<String, dynamic>>> getTableDataLocalDb(
+      String tableName) async {
+    if (tableName != 'users' && tableName != 'LoggedInData') {
+      throw Exception('Table $tableName does not exist.');
+    }
+    final db = await _db;
+    final store = intMapStoreFactory.store(tableName);
+    final recordSnapshots = await store.find(db);
+    return recordSnapshots.map((snapshot) => snapshot.value).toList();
   }
 }

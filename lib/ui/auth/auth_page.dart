@@ -1,8 +1,10 @@
+import 'package:docibry/repositories/local_db_service.dart';
 import 'package:docibry/ui/home/home_page.dart';
+import 'package:docibry/models/user_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -30,7 +32,7 @@ class _AuthPageState extends State<AuthPage> {
     final User? user = _auth.currentUser;
     if (user != null) {
       Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (_) => HomePage()));
+          .pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
     }
   }
 
@@ -43,10 +45,14 @@ class _AuthPageState extends State<AuthPage> {
       UserCredential userCredential;
       if (_isLogin) {
         userCredential = await _auth.signInWithEmailAndPassword(
-            email: _emailController.text, password: _passwordController.text);
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
       } else {
         userCredential = await _auth.createUserWithEmailAndPassword(
-            email: _emailController.text, password: _passwordController.text);
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
 
         await FirebaseFirestore.instance
             .collection('users')
@@ -57,13 +63,21 @@ class _AuthPageState extends State<AuthPage> {
         });
       }
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('userEmail', _emailController.text);
-      await prefs.setString('userId', userCredential.user!.uid);
-      await prefs.setString('username', _usernameController.text);
+      // Initialize local database service and save user details
+      if (!kIsWeb) {
+        final localDbService = LocalDbService();
+        await localDbService.initLocalDb();
+        await localDbService.saveLoggedInUser(
+          UserModel(
+            userEmail: _emailController.text,
+            userId: userCredential.user!.uid,
+            username: _usernameController.text,
+          ),
+        );
+      }
 
       Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (_) => HomePage()));
+          .pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
     } catch (error) {
       print('Error: $error');
     } finally {
@@ -87,21 +101,21 @@ class _AuthPageState extends State<AuthPage> {
             children: [
               TextField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: const InputDecoration(labelText: 'Email'),
               ),
               TextField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
               ),
               if (!_isLogin)
                 TextField(
                   controller: _usernameController,
-                  decoration: InputDecoration(labelText: 'Username'),
+                  decoration: const InputDecoration(labelText: 'Username'),
                 ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _isLoading
-                  ? CircularProgressIndicator()
+                  ? const CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: _authenticate,
                       child: Text(_isLogin ? 'Login' : 'Register'),

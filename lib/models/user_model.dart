@@ -1,30 +1,32 @@
-const String loggedInUserId = 'test@gmail.com';
-
 class UserModel {
-  final String email;
+  final String userEmail;
+  final String userId;
   final String username;
 
   const UserModel({
-    required this.email,
+    required this.userEmail,
+    required this.userId,
     required this.username,
   });
 
-  // Factory constructor to create a UserModel from a Firestore document snapshot
+  // Factory constructor to create a UserModel from a map
   factory UserModel.fromMap(Map<String, dynamic> data) {
     return UserModel(
-      email: data['email'] as String,
+      userEmail: data['userEmail'] as String,
+      userId: data['userId'] as String,
       username: data['username'] as String,
     );
   }
 
-  // Method to convert UserModel to a map for Firestore
+  // Method to convert UserModel to a map
   Map<String, dynamic> toMap() {
     return {
-      'email': email,
+      'userEmail': userEmail,
+      'userId': userId,
       'username': username,
     };
   }
 
   @override
-  List<Object?> get props => [email, username];
+  List<Object?> get props => [userEmail, userId, username];
 }

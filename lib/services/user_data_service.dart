@@ -16,8 +16,8 @@ class UserDataService {
     } catch (firebaseError) {
       // If an error occurs, fallback to retrieving from the offline database
       try {
-        final offlineUser = await _dbHelper.getLoggedInUserLocalDb();
-        return offlineUser?.email;
+        final offlineUser = await _dbHelper.getLoggedInUser();
+        return offlineUser?.userEmail;
       } catch (dbError) {
         // Handle potential errors with the offline database as well
         return null;
