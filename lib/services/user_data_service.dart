@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:docibry/services/database_helper.dart';
-import 'package:docibry/models/user_model.dart';
 
 class UserDataService {
   final DatabaseHelper _dbHelper = DatabaseHelper();

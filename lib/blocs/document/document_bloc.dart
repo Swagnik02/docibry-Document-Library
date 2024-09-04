@@ -1,10 +1,9 @@
 import 'dart:developer';
 import 'package:bloc/bloc.dart';
-
 import 'package:docibry/models/document_model.dart';
 import 'package:docibry/services/database_helper.dart';
 import 'package:docibry/services/firestore_helper.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:docibry/services/user_data_service.dart';
 import 'package:flutter/foundation.dart';
 import 'document_event.dart';
 import 'document_state.dart';
@@ -12,27 +11,37 @@ import 'document_state.dart';
 class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final FirestoreHelper _firestoreHelper = FirestoreHelper();
-  String? _userEmail;
-
+  final UserDataService _userDataService = UserDataService();
+  String? _userEmail = '';
   DocumentBloc() : super(DocumentInitial()) {
-    // Initialize _userEmail from FirebaseAuth
-    final user = FirebaseAuth.instance.currentUser;
-    _userEmail = user?.email;
+    _initializeUserEmail();
 
-    on<FetchDocuments>(_onFetchDocuments);
+    on<GetDocument>(_onGetDocument);
     on<AddDocument>(_onAddDocument);
     on<UpdateDocument>(_onUpdateDocument);
     on<DeleteDocument>(_onDeleteDocument);
-    // on<UserLoggedIn>(_onUserLoggedIn);
   }
 
-  Future<void> _onFetchDocuments(
-      FetchDocuments event, Emitter<DocumentState> emit) async {
+  // Initialize _userEmail
+  Future<void> _initializeUserEmail() async {
+    try {
+      _userEmail = await _userDataService.getUserEmail();
+      if (_userEmail == null) {
+        emit(DocumentError(error: 'No user email available.'));
+      }
+    } catch (e) {
+      emit(DocumentError(
+          error: 'Error initializing user email: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onGetDocument(
+      GetDocument event, Emitter<DocumentState> emit) async {
     if (_userEmail == null) {
       emit(DocumentError(error: 'No user email provided.'));
       return;
     }
-
+    log(_userEmail.toString());
     try {
       emit(DocumentLoading());
 
@@ -57,6 +66,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
 
   Future<void> _onAddDocument(
       AddDocument event, Emitter<DocumentState> emit) async {
+    log(_userEmail.toString());
     try {
       final doc = DocModel(
         docName: event.docName,

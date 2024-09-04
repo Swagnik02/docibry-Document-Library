@@ -8,7 +8,7 @@ abstract class DocumentEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class FetchDocuments extends DocumentEvent {}
+class GetDocument extends DocumentEvent {}
 
 class AddDocument extends DocumentEvent {
   final String docName;
@@ -40,7 +40,7 @@ class UpdateDocument extends DocumentEvent {
 }
 
 class DeleteDocument extends DocumentEvent {
-  final String uid; // Changed to String
+  final String uid;
 
   const DeleteDocument({required this.uid});
 

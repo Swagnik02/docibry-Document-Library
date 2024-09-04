@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:docibry/blocs/auth/bloc/auth_bloc.dart';
-import 'package:docibry/blocs/auth/bloc/auth_event.dart';
 
 class ProfilePage extends StatelessWidget {
   @override
@@ -30,7 +28,7 @@ class ProfilePage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              context.read<AuthBloc>().add(AuthEventLogoutRequested());
+              // context.read<AuthBloc>().add(AuthEventLogoutRequested());
             },
           ),
         ],
