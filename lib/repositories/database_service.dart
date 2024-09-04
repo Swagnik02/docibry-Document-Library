@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:docibry/models/document_model.dart';
 import 'package:docibry/repositories/local_db_service.dart';
 import 'package:docibry/repositories/firestore_db_service.dart';
+import 'package:http/http.dart' as http;
 
 class DatabaseService {
   final LocalDbService _localDbService = LocalDbService();
@@ -78,12 +81,18 @@ class DatabaseService {
         }
       }
     } catch (e) {
-      // Handle errors or log them
+      log(e.toString());
     }
   }
 
   Future<bool> _isInternetAvailable() async {
-    // Implement your internet connectivity check here
-    return true;
+    try {
+      final response = await http.get(
+        Uri.parse('https://www.google.com'),
+      );
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
   }
 }
