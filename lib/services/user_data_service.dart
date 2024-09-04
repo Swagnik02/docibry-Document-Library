@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:docibry/services/database_helper.dart';
 
 class UserDataService {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
+  final LocalDbService _dbHelper = LocalDbService();
 
   Future<String?> getUserEmail() async {
     try {

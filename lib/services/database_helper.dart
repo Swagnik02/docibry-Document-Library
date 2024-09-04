@@ -6,10 +6,10 @@ import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:docibry/models/document_model.dart';
 
-class DatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
-  factory DatabaseHelper() => _instance;
-  DatabaseHelper._internal();
+class LocalDbService {
+  static final LocalDbService _instance = LocalDbService._internal();
+  factory LocalDbService() => _instance;
+  LocalDbService._internal();
 
   Database? _database;
   late final Database _db;

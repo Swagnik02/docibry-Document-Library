@@ -9,20 +9,20 @@ import 'document_event.dart';
 import 'document_state.dart';
 
 class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
-  final FirestoreHelper _firestoreHelper = FirestoreHelper();
+  final LocalDbService _dbHelper = LocalDbService();
+  final FirestoreDbService _FirestoreDbService = FirestoreDbService();
   final UserDataService _userDataService = UserDataService();
-  String? _userEmail = '';
+  String? _userEmail;
+
   DocumentBloc() : super(DocumentInitial()) {
     _initializeUserEmail();
 
-    on<GetDocument>(_onGetDocument);
-    on<AddDocument>(_onAddDocument);
-    on<UpdateDocument>(_onUpdateDocument);
-    on<DeleteDocument>(_onDeleteDocument);
+    on<GetDocument>(_handleGetDocument);
+    on<AddDocument>(_handleAddDocument);
+    on<UpdateDocument>(_handleUpdateDocument);
+    on<DeleteDocument>(_handleDeleteDocument);
   }
 
-  // Initialize _userEmail
   Future<void> _initializeUserEmail() async {
     try {
       _userEmail = await _userDataService.getUserEmail();
@@ -35,121 +35,117 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     }
   }
 
-  Future<void> _onGetDocument(
+  Future<void> _handleGetDocument(
       GetDocument event, Emitter<DocumentState> emit) async {
     if (_userEmail == null) {
       emit(DocumentError(error: 'No user email provided.'));
       return;
     }
-    log(_userEmail.toString());
-    try {
-      emit(DocumentLoading());
 
+    emit(DocumentLoading());
+
+    try {
       if (kIsWeb) {
-        log('Fetching documents on Web');
         final documents =
-            await _firestoreHelper.fetchDocumentsForUser(_userEmail!);
+            await _FirestoreDbService.getDocumentFromFirestore(_userEmail!);
         emit(DocumentLoaded(documents: documents));
       } else {
-        // Load local documents first
         final documents = await _dbHelper.getDocuments(_userEmail!);
         emit(DocumentLoaded(documents: documents));
-
-        // Start background sync with Firestore
         _syncWithFirestoreInBackground();
       }
     } catch (e) {
-      log('Error fetching documents: $e');
       emit(DocumentError(error: e.toString()));
     }
   }
 
-  Future<void> _onAddDocument(
+  Future<void> _handleAddDocument(
       AddDocument event, Emitter<DocumentState> emit) async {
-    log(_userEmail.toString());
-    try {
-      final doc = DocModel(
-        docName: event.docName,
-        docCategory: event.docCategory,
-        docId: event.docId.isNotEmpty ? event.docId : ' ',
-        holdersName: event.holdersName.isNotEmpty ? event.holdersName : ' ',
-        dateAdded: DateTime.now(),
-        docFile: event.filePath,
-      );
+    if (_userEmail == null) {
+      emit(DocumentError(error: 'No user email provided.'));
+      return;
+    }
 
+    final doc = DocModel(
+      docName: event.docName,
+      docCategory: event.docCategory,
+      docId: event.docId.isNotEmpty ? event.docId : ' ',
+      holdersName: event.holdersName.isNotEmpty ? event.holdersName : ' ',
+      dateAdded: DateTime.now(),
+      docFile: event.filePath,
+    );
+
+    try {
       if (kIsWeb) {
-        log('Adding document on Web');
-        await _firestoreHelper.addDocument(_userEmail!, doc);
+        await _FirestoreDbService.addDocumentFromFirestore(_userEmail!, doc);
         final documents =
-            await _firestoreHelper.fetchDocumentsForUser(_userEmail!);
+            await _FirestoreDbService.getDocumentFromFirestore(_userEmail!);
         emit(DocumentLoaded(documents: documents));
       } else {
-        // Insert document into local database
         await _dbHelper.insertDocument(_userEmail!, doc);
-
-        // Check for internet connectivity and add to Firestore if available
         if (await _isInternetAvailable()) {
-          await _firestoreHelper.addDocument(_userEmail!, doc);
+          await _FirestoreDbService.addDocumentFromFirestore(_userEmail!, doc);
         }
         final documents = await _dbHelper.getDocuments(_userEmail!);
         emit(DocumentLoaded(documents: documents));
       }
-
-      log('Document added successfully');
     } catch (e) {
-      log('Error adding document: $e');
       emit(DocumentError(error: e.toString()));
     }
   }
 
-  Future<void> _onUpdateDocument(
+  Future<void> _handleUpdateDocument(
       UpdateDocument event, Emitter<DocumentState> emit) async {
-    try {
-      final doc = event.document;
+    if (_userEmail == null) {
+      emit(DocumentError(error: 'No user email provided.'));
+      return;
+    }
 
+    try {
       if (kIsWeb) {
-        log('Updating document on Web');
-        await _firestoreHelper.updateDocument(_userEmail!, doc);
+        await _FirestoreDbService.updateDocumentFromFirestore(
+            _userEmail!, event.document);
         final documents =
-            await _firestoreHelper.fetchDocumentsForUser(_userEmail!);
+            await _FirestoreDbService.getDocumentFromFirestore(_userEmail!);
         emit(DocumentLoaded(documents: documents));
       } else {
-        await _dbHelper.updateDocument(_userEmail!, doc);
+        await _dbHelper.updateDocument(_userEmail!, event.document);
         if (await _isInternetAvailable()) {
-          await _firestoreHelper.updateDocument(_userEmail!, doc);
+          await _FirestoreDbService.updateDocumentFromFirestore(
+              _userEmail!, event.document);
         }
         final documents = await _dbHelper.getDocuments(_userEmail!);
         emit(DocumentLoaded(documents: documents));
       }
-
-      log('Document updated successfully');
     } catch (e) {
-      log('Error updating document: $e');
       emit(DocumentError(error: e.toString()));
     }
   }
 
-  Future<void> _onDeleteDocument(
+  Future<void> _handleDeleteDocument(
       DeleteDocument event, Emitter<DocumentState> emit) async {
+    if (_userEmail == null) {
+      emit(DocumentError(error: 'No user email provided.'));
+      return;
+    }
+
     try {
       if (kIsWeb) {
-        log('Deleting document on Web');
-        await _firestoreHelper.deleteDocument(_userEmail!, event.uid);
+        await _FirestoreDbService.deleteDocumentFromFirestore(
+            _userEmail!, event.uid);
         final documents =
-            await _firestoreHelper.fetchDocumentsForUser(_userEmail!);
+            await _FirestoreDbService.getDocumentFromFirestore(_userEmail!);
         emit(DocumentLoaded(documents: documents));
       } else {
         await _dbHelper.deleteDocument(_userEmail!, event.uid);
         if (await _isInternetAvailable()) {
-          await _firestoreHelper.deleteDocument(_userEmail!, event.uid);
+          await _FirestoreDbService.deleteDocumentFromFirestore(
+              _userEmail!, event.uid);
         }
         final documents = await _dbHelper.getDocuments(_userEmail!);
         emit(DocumentLoaded(documents: documents));
       }
-
-      log('Document deleted successfully');
     } catch (e) {
-      log('Error deleting document: $e');
       emit(DocumentError(error: e.toString()));
     }
   }
@@ -163,7 +159,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     try {
       if (await _isInternetAvailable()) {
         final firestoreDocs =
-            await _firestoreHelper.fetchDocumentsForUser(_userEmail!);
+            await _FirestoreDbService.getDocumentFromFirestore(_userEmail!);
         await _syncLocalWithFirestore(firestoreDocs);
       }
     } catch (e) {
@@ -172,23 +168,22 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   }
 
   Future<void> _syncLocalWithFirestore(List<DocModel> firestoreDocs) async {
-    if (kIsWeb) {
-      // Syncing not applicable for web, implement if needed
-      return;
-    }
+    if (kIsWeb) return; // Syncing not applicable for web, implement if needed
 
     final localDocs = await _dbHelper.getDocuments(_userEmail!);
 
     // Add new documents to local storage
-    for (var doc in firestoreDocs) {
+    final newDocs = firestoreDocs
+        .where((doc) => !localDocs.any((local) => local.uid == doc.uid));
+    for (var doc in newDocs) {
       await _dbHelper.insertDocument(_userEmail!, doc);
     }
 
     // Remove documents from local storage that are no longer in Firestore
-    for (var doc in localDocs) {
-      if (!firestoreDocs.any((d) => d.uid == doc.uid)) {
-        await _dbHelper.deleteDocument(_userEmail!, doc.uid);
-      }
+    final removedDocs = localDocs.where((doc) =>
+        !firestoreDocs.any((firestoreDoc) => firestoreDoc.uid == doc.uid));
+    for (var doc in removedDocs) {
+      await _dbHelper.deleteDocument(_userEmail!, doc.uid);
     }
 
     final updatedDocuments = await _dbHelper.getDocuments(_userEmail!);
