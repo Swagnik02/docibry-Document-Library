@@ -39,7 +39,6 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
 
   Future<void> _onGetDocument(
       GetDocument event, Emitter<DocumentState> emit) async {
-    log('_onGetDocument');
     if (_userUid == null) {
       emit(const DocumentError(error: 'No user email provided.'));
       return;
@@ -48,12 +47,12 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     emit(DocumentLoading());
 
     try {
-      final documents = await _databaseService.getDocuments(_userUid!);
-      emit(DocumentLoaded(documents: documents));
-
       if (!kIsWeb) {
-        _syncWithFirestoreInBackground();
+        await _syncWithFirestoreInBackground();
       }
+      final documents = await _databaseService.getDocuments(_userUid!);
+
+      emit(DocumentLoaded(documents: documents));
     } catch (e) {
       emit(DocumentError(error: e.toString()));
     }

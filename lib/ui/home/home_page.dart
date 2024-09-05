@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:developer' as dev show log;
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/constants/routes.dart';
 import 'package:docibry/ui/profile/profile_page.dart';
@@ -57,8 +58,9 @@ class HomePageState extends State<HomePage> {
         if (state is DocumentLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is DocumentLoaded) {
-          final documents = state.documents;
-          final filteredDocs = documents
+          List<DocModel> documents = state.documents;
+
+          List<DocModel> filteredDocs = documents
               .where((doc) =>
                   (selectedFilter == StringDocCategory.allCategory ||
                       doc.docCategory == selectedFilter) &&

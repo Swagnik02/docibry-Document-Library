@@ -9,8 +9,6 @@ class FirestoreDbService {
   // Fetch documents from Firestore for a specific user
   Future<List<DocModel>> getDocumentFromFirestore(String userUid) async {
     try {
-      log('Loading data from firebase');
-
       DocumentReference userDocRef =
           _firestore.collection('users').doc(userUid.toString());
       QuerySnapshot querySnapshot = await userDocRef.collection('docs').get();

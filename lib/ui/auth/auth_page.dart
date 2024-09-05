@@ -14,8 +14,10 @@ class AuthPage extends StatefulWidget {
 
 class _AuthPageState extends State<AuthPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController =
+      TextEditingController(text: 'swagnik1234@gmail.com');
+  final TextEditingController _passwordController =
+      TextEditingController(text: 'password02');
   final TextEditingController _usernameController = TextEditingController();
 
   bool _isLogin = true;

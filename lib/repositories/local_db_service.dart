@@ -45,7 +45,7 @@ class LocalDbService {
     final db = await _db;
     final finder = Finder(sortOrders: [SortOrder('uid')]);
     final recordSnapshots = await docsStore.find(db, finder: finder);
-    log('Loading data from local database');
+
     return recordSnapshots.map(
       (snapshot) {
         final doc = DocModel.fromMap(snapshot.value);
@@ -128,17 +128,8 @@ class LocalDbService {
 
   Future<void> logout(String userUid, String uid) async {
     try {
-      await deleteLoggedInUser();
-      await deleteDocumentLocalDb(uid);
-      final db = await _db;
-      final userTableNames = await getTableNamesLocalDb();
-      for (var tableName in userTableNames) {
-        final store = tableName == 'docs'
-            ? stringMapStoreFactory.store(tableName)
-            : intMapStoreFactory.store(tableName);
-        await store.delete(db, finder: Finder());
-      }
-      log('Data Cleared');
+      deleteDatabaseFile();
+      log('Data cleared successfully during logout');
     } catch (e) {
       log('Error during logout and clearing local database: $e');
     }
