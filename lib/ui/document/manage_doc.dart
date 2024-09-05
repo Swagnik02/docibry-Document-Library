@@ -50,8 +50,11 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     super.initState();
 
     if (!kIsWeb) {
-      requestPermission(Permission.storage);
-      requestPermission(Permission.manageExternalStorage);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await requestPermission(Permission.storage);
+        await requestPermission(Permission.photos);
+        await requestPermission(Permission.manageExternalStorage);
+      });
     }
 
     _selectedCategory = DocCategory.allCategories.isNotEmpty
