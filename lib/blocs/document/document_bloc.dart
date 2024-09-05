@@ -40,7 +40,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   Future<void> _onGetDocument(
       GetDocument event, Emitter<DocumentState> emit) async {
     if (_userUid == null) {
-      emit(const DocumentError(error: 'No user email provided.'));
+      emit(const DocumentError(error: 'No user uid provided.'));
       return;
     }
 

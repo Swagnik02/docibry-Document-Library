@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:docibry/constants/string_constants.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:sembast/sembast.dart';
@@ -20,7 +21,7 @@ class LocalDbService {
 
   Future<Database> _initDatabaseLocalDb() async {
     final dir = await getApplicationDocumentsDirectory();
-    final dbPath = join(dir.path, 'documents.db');
+    final dbPath = join(dir.path, DbCollections.documentsDb);
     return await databaseFactoryIo.openDatabase(dbPath);
   }
 
@@ -31,7 +32,7 @@ class LocalDbService {
 
   Future<StoreRef<String, Map<String, dynamic>>> _getDocsStore() async {
     final db = await _db;
-    return stringMapStoreFactory.store('docs');
+    return stringMapStoreFactory.store(DbCollections.docs);
   }
 
   Future<void> addDocumentLocalDb(DocModel doc) async {
@@ -68,7 +69,7 @@ class LocalDbService {
 
   Future<StoreRef<int, Map<String, dynamic>>> _getLoggedInUserStore() async {
     final db = await _db;
-    return intMapStoreFactory.store('loggedInUserData');
+    return intMapStoreFactory.store(DbCollections.loggedInUserData);
   }
 
   Future<void> saveLoggedInUser(UserModel user) async {
@@ -109,23 +110,6 @@ class LocalDbService {
     }
   }
 
-  Future<List<String>> getTableNamesLocalDb() async {
-    return ['docs', 'loggedInUserData'];
-  }
-
-  Future<List<Map<String, dynamic>>> getTableDataLocalDb(
-      String tableName) async {
-    if (tableName != 'docs' && tableName != 'loggedInUserData') {
-      throw Exception('Table $tableName does not exist.');
-    }
-    final db = await _db;
-    final store = tableName == 'docs'
-        ? stringMapStoreFactory.store(tableName)
-        : intMapStoreFactory.store(tableName);
-    final recordSnapshots = await store.find(db);
-    return recordSnapshots.map((snapshot) => snapshot.value).toList();
-  }
-
   Future<void> logout(String userUid, String uid) async {
     try {
       deleteDatabaseFile();
@@ -138,13 +122,14 @@ class LocalDbService {
   Future<void> saveDbFileToDownloads() async {
     try {
       final dir = await getApplicationDocumentsDirectory();
-      final dbPath = join(dir.path, 'documents.db');
+      final dbPath = join(dir.path, DbCollections.documentsDb);
       final dbFile = File(dbPath);
       final downloadsDir = Directory('/storage/emulated/0/Download');
       if (!await downloadsDir.exists()) {
         await downloadsDir.create(recursive: true);
       }
-      final downloadFilePath = join(downloadsDir.path, 'documents.db');
+      final downloadFilePath =
+          join(downloadsDir.path, DbCollections.documentsDb);
       await dbFile.copy(downloadFilePath);
       log('Database file copied to Downloads folder');
     } catch (e) {
@@ -155,7 +140,7 @@ class LocalDbService {
   Future<void> deleteDatabaseFile() async {
     try {
       final dir = await getApplicationDocumentsDirectory();
-      final dbPath = join(dir.path, 'documents.db');
+      final dbPath = join(dir.path, DbCollections.documentsDb);
       final dbFile = File(dbPath);
       if (await dbFile.exists()) {
         await dbFile.delete();

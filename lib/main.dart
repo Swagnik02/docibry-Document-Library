@@ -1,5 +1,6 @@
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/constants/routes.dart';
+import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/firebase_options.dart';
 import 'package:docibry/repositories/local_db_service.dart';
 import 'package:docibry/ui/auth/auth_page.dart';
@@ -40,7 +41,7 @@ class DocibryApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Docibry',
+      title: AppStrings.appFullName,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
       ),

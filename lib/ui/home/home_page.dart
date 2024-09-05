@@ -20,7 +20,7 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  String selectedFilter = StringDocCategory.allCategory;
+  String selectedFilter = DocCategory.all;
   String searchQuery = '';
 
   void _onCategorySelected(String category) {
@@ -61,7 +61,7 @@ class HomePageState extends State<HomePage> {
 
           List<DocModel> filteredDocs = documents
               .where((doc) =>
-                  (selectedFilter == StringDocCategory.allCategory ||
+                  (selectedFilter == DocCategory.all ||
                       doc.docCategory == selectedFilter) &&
                   doc.docName.toLowerCase().contains(searchQuery.toLowerCase()))
               .toList();
@@ -97,7 +97,7 @@ class HomePageState extends State<HomePage> {
           return Scaffold(
             appBar: AppBar(
               title: Text(
-                StringConstants.appName,
+                AppStrings.appName,
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
               actions: [
@@ -114,7 +114,7 @@ class HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            body: const Center(child: Text(StringConstants.stringNoDataFound)),
+            body: const Center(child: Text(ErrorMessages.noDataFound)),
             floatingActionButton: FloatingActionButton(
               onPressed: () => Navigator.pushNamed(context, addDocRoute),
               child: const Icon(Icons.add),
@@ -131,7 +131,7 @@ class HomePageState extends State<HomePage> {
     return Expanded(
       child: filteredDocs.isEmpty
           ? const Center(
-              child: Text(StringConstants.stringNoDataFound),
+              child: Text(ErrorMessages.noDataFound),
             )
           : MediaQuery.of(context).size.width > 395
               ? GridView.builder(
@@ -161,12 +161,12 @@ class HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             DocCategoryFilterChip(
-              label: StringDocCategory.allCategory,
-              isSelected: selectedFilter == StringDocCategory.allCategory,
+              label: DocCategory.all,
+              isSelected: selectedFilter == DocCategory.all,
               onSelected: _onCategorySelected,
             ),
-            ...StringDocCategory.categoryList
-                .where((category) => category != StringDocCategory.allCategory)
+            ...DocCategory.allCategories
+                .where((category) => category != DocCategory.all)
                 .map((category) {
               return DocCategoryFilterChip(
                 label: category,

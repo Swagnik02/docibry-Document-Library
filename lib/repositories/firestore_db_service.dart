@@ -1,5 +1,7 @@
+import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/models/document_model.dart';
 
 class FirestoreDbService {
@@ -9,14 +11,15 @@ class FirestoreDbService {
   Future<List<DocModel>> getDocumentFromFirestore(String userUid) async {
     try {
       DocumentReference userDocRef =
-          _firestore.collection('users').doc(userUid.toString());
-      QuerySnapshot querySnapshot = await userDocRef.collection('docs').get();
+          _firestore.collection(DbCollections.users).doc(userUid.toString());
+      QuerySnapshot querySnapshot =
+          await userDocRef.collection(DbCollections.docs).get();
 
       return querySnapshot.docs.map((doc) {
         return DocModel.fromMap(doc.data() as Map<String, dynamic>);
       }).toList();
     } catch (error) {
-      print('Failed to fetch documents from Firestore: $error');
+      log('${ErrorMessages.failedToFetchDoc} Firebase: $error');
       return [];
     }
   }
@@ -25,10 +28,13 @@ class FirestoreDbService {
   Future<void> addDocumentFromFirestore(String userUid, DocModel doc) async {
     try {
       DocumentReference userDocRef =
-          _firestore.collection('users').doc(userUid.toString());
-      await userDocRef.collection('docs').doc(doc.uid).set(doc.toMap());
+          _firestore.collection(DbCollections.users).doc(userUid.toString());
+      await userDocRef
+          .collection(DbCollections.docs)
+          .doc(doc.uid)
+          .set(doc.toMap());
     } catch (error) {
-      print('Failed to add document to Firestore: $error');
+      log('${ErrorMessages.failedToAddDoc} Firebase: $error');
     }
   }
 
@@ -36,10 +42,13 @@ class FirestoreDbService {
   Future<void> updateDocumentFromFirestore(String userUid, DocModel doc) async {
     try {
       DocumentReference userDocRef =
-          _firestore.collection('users').doc(userUid.toString());
-      await userDocRef.collection('docs').doc(doc.uid).update(doc.toMap());
+          _firestore.collection(DbCollections.users).doc(userUid.toString());
+      await userDocRef
+          .collection(DbCollections.docs)
+          .doc(doc.uid)
+          .update(doc.toMap());
     } catch (error) {
-      print('Failed to update document in Firestore: $error');
+      log('${ErrorMessages.failedToUpdateDoc} Firebase: $error');
     }
   }
 
@@ -48,10 +57,10 @@ class FirestoreDbService {
       String userUid, String docUid) async {
     try {
       DocumentReference userDocRef =
-          _firestore.collection('users').doc(userUid.toString());
-      await userDocRef.collection('docs').doc(docUid).delete();
+          _firestore.collection(DbCollections.users).doc(userUid.toString());
+      await userDocRef.collection(DbCollections.docs).doc(docUid).delete();
     } catch (error) {
-      print('Failed to delete document from Firestore: $error');
+      log('${ErrorMessages.failedToDeleteDoc} Firebase: $error');
     }
   }
 }

@@ -49,7 +49,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
       listener: (context, state) {},
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(StringConstants.stringShareDoc),
+          title: const Text(AppStrings.shareDoc),
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),

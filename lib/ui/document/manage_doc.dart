@@ -54,8 +54,8 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
       requestPermission(Permission.manageExternalStorage);
     }
 
-    _selectedCategory = StringDocCategory.categoryList.isNotEmpty
-        ? StringDocCategory.categoryList.first
+    _selectedCategory = DocCategory.allCategories.isNotEmpty
+        ? DocCategory.allCategories.first
         : null;
     _tabController = TabController(length: 2, vsync: this);
     _docNameController = TextEditingController();
@@ -89,7 +89,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         if (state is DocumentLoaded) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text(StringConstants.stringAddDocSuccess),
+              content: Text(AppStrings.addDocSuccess),
             ),
           );
           Navigator.pop(context);
@@ -98,7 +98,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         else if (state is DocumentDeleted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text(StringConstants.stringDeleteDocSuccess),
+              content: Text(ErrorMessages.deleteDocSuccess),
             ),
           );
           Navigator.pop(context);
@@ -107,7 +107,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         else if (state is DocumentError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('${StringConstants.stringError} ${state.error}'),
+              content: Text('${ErrorMessages.error} ${state.error}'),
             ),
           );
         }
@@ -116,10 +116,10 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: widget.isAdd
-              ? const Text(StringConstants.stringAddDoc)
+              ? const Text(AppStrings.addDoc)
               : _isEditMode
-                  ? const Text(StringConstants.stringEditDoc)
-                  : const Text(StringConstants.stringViewDoc),
+                  ? const Text(AppStrings.editDoc)
+                  : const Text(AppStrings.viewDoc),
           actions: [
             IconButton(
               onPressed: _handleDelete,
@@ -168,7 +168,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                   width: windowWidth / 2,
                   child: docNameTextField(
                     controller: _docNameController,
-                    hintText: StringConstants.stringEnterDocName,
+                    hintText: AppStrings.enterDocName,
                     isAdd: widget.isAdd,
                     isEditMode: _isEditMode,
                   ),
@@ -198,7 +198,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
             padding: const EdgeInsets.all(8.0),
             child: docNameTextField(
               controller: _docNameController,
-              hintText: StringConstants.stringEnterDocName,
+              hintText: AppStrings.enterDocName,
               isAdd: widget.isAdd,
               isEditMode: _isEditMode,
             ),
@@ -217,8 +217,8 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     return Expanded(
       child: CustomTabBarView(
         tabs: const [
-          Tab(text: StringConstants.stringDoc),
-          Tab(text: StringConstants.stringData),
+          Tab(text: AppStrings.doc),
+          Tab(text: AppStrings.data),
         ],
         tabViews: [
           tab1(),
@@ -247,7 +247,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.add, size: 50, color: Colors.grey),
-                  Text(StringConstants.stringAddFile),
+                  Text(AppStrings.addFile),
                 ],
               )
             : Image.memory(base64ToUint8List(widget.document!.docFile));
@@ -301,8 +301,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                         borderRadius: BorderRadius.circular(10),
                         alignment: Alignment.center,
                         value: _selectedCategory,
-                        items: StringDocCategory.categoryList
-                            .map((String category) {
+                        items: DocCategory.allCategories.map((String category) {
                           return DropdownMenuItem<String>(
                             value: category,
                             child: Text(category),
@@ -313,7 +312,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                             _selectedCategory = newValue;
                           });
                         },
-                        hint: const Text(StringConstants.stringSelectCategory),
+                        hint: const Text(AppStrings.selectCategory),
                       )
                     : Padding(
                         padding: const EdgeInsets.symmetric(
@@ -329,13 +328,13 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                       ),
                 buildTextField(
                   controller: _docIdController,
-                  labelText: StringConstants.stringDocumentId,
+                  labelText: AppStrings.documentId,
                   isAdd: widget.isAdd,
                   isEditMode: _isEditMode,
                 ),
                 buildTextField(
                   controller: _holderNameController,
-                  labelText: StringConstants.stringHoldersName,
+                  labelText: AppStrings.holdersName,
                   isAdd: widget.isAdd,
                   isEditMode: _isEditMode,
                 ),
@@ -368,10 +367,10 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                   padding: const EdgeInsets.symmetric(vertical: 15.0),
                   child: Text(
                     widget.isAdd
-                        ? StringConstants.stringSubmit
+                        ? AppStrings.submit
                         : _isEditMode
-                            ? StringConstants.stringUpdate
-                            : StringConstants.stringEdit,
+                            ? AppStrings.update
+                            : AppStrings.edit,
                   ),
                 ),
         ),
@@ -414,7 +413,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     } else {
       if (mounted) {
         log('error submit button');
-        showSnackBar(context, StringConstants.stringFillAll);
+        showSnackBar(context, AppStrings.fillAllFields);
       }
     }
   }
@@ -423,7 +422,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     setState(() {
       _isEditMode = !_isEditMode;
     });
-    showSnackBar(context, StringConstants.stringEditModeEnabled);
+    showSnackBar(context, AppStrings.editModeEnabled);
   }
 
   void _handleUpdate() async {
@@ -454,7 +453,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
       }
     } else {
       if (mounted) {
-        showSnackBar(context, StringConstants.stringFillAll);
+        showSnackBar(context, AppStrings.fillAllFields);
       }
     }
   }
@@ -475,10 +474,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: [
-        ...FileExtensions.imageExtensions,
-        ...FileExtensions.docExtensions
-      ],
+      allowedExtensions: [...FileExtensions.image, ...FileExtensions.document],
     );
 
     if (result != null) {
@@ -501,13 +497,12 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
       else {
         log('File path: ${pickedFile.path}');
 
-        if (FileExtensions.docExtensions.contains(pickedFile.extension)) {
+        if (FileExtensions.document.contains(pickedFile.extension)) {
           io.File? convertedImage = await pdfToImage(pickedFile);
           setState(() {
             _image = convertedImage;
           });
-        } else if (FileExtensions.imageExtensions
-            .contains(pickedFile.extension)) {
+        } else if (FileExtensions.image.contains(pickedFile.extension)) {
           setState(() {
             _image = io.File(pickedFile.path!);
           });

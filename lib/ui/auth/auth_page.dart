@@ -1,3 +1,4 @@
+import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/repositories/local_db_service.dart';
 import 'package:docibry/ui/home/home_page.dart';
 import 'package:docibry/models/user_model.dart';
@@ -13,10 +14,8 @@ class AuthPage extends StatefulWidget {
 
 class _AuthPageState extends State<AuthPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final TextEditingController _emailController =
-      TextEditingController(text: 'swagnik1234@gmail.com');
-  final TextEditingController _passwordController =
-      TextEditingController(text: 'password02');
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
 
   bool _isLogin = true;
@@ -57,7 +56,7 @@ class _AuthPageState extends State<AuthPage> {
         );
 
         await FirebaseFirestore.instance
-            .collection('users')
+            .collection(DbCollections.users)
             .doc(userCredential.user!.uid)
             .set({
           'username': _usernameController.text,

@@ -1,7 +1,6 @@
-class StringDocCategory {
+class DocCategory {
   // Category constants
-
-  static const String allCategory = 'All';
+  static const String all = 'All';
   static const String identity = 'Identity';
   static const String education = 'Education';
   static const String work = 'Work';
@@ -14,7 +13,7 @@ class StringDocCategory {
   static const String miscellaneous = 'Miscellaneous';
 
   // List of all categories
-  static const List<String> categoryList = [
+  static const List<String> allCategories = [
     identity,
     education,
     work,
@@ -28,59 +27,72 @@ class StringDocCategory {
   ];
 }
 
-class StringConstants {
+class AppStrings {
+  // App info
   static const String appName = 'docibry';
-  static const String appFullName = 'docibry: Document Library';
+  static const String appFullName = '$appName: Document Library';
 
-  // manage doc strings
-  static const String stringDoc = 'Doc';
-  static const String stringData = 'Data';
+  // Common labels
+  static const String submit = 'SUBMIT';
+  static const String update = 'UPDATE';
+  static const String edit = 'EDIT';
 
-  // add doc strings
-  static const String stringAddDoc = 'Add Document';
-  static const String stringAddFile = 'Add file';
-  static const String stringEnterDocName = 'Enter Document Name';
-  static const String stringSelectCategory = 'Select Category';
-  static const String stringCategory = 'Category';
-  static const String stringDocumentId = 'Document ID';
-  static const String stringHoldersName = "Holder's Name";
+  // Document management
+  static const String addDoc = 'Add Document';
+  static const String addFile = 'Add file';
+  static const String enterDocName = 'Enter Document Name';
+  static const String selectCategory = 'Select Category';
+  static const String documentId = 'Document ID';
+  static const String holdersName = "Holder's Name";
+  static const String doc = "Doc";
+  static const String data = "Data";
+  static const String searchField = "Search for document names";
 
-  // view doc strings
-  static const String stringViewDoc = 'View Document';
-  static const String stringAddDocSuccess = 'Document added successfully!';
+  static const String viewDoc = 'View Document';
+  static const String addDocSuccess = 'Document added successfully!';
+  static const String editDoc = 'Edit Document';
+  static const String editModeEnabled = 'Edit Mode Enabled';
 
-  // Edit doc strings
-  static const String stringEditDoc = 'Edit Document';
-  static const String stringEditModeEnabled = 'Edit Mode Enabled';
-
-  // error strings
-  static const String stringError = 'Error:';
-  static const String stringDeleteDocSuccess =
-      'Document deleted successfully !';
-  static const String stringNoDocsFound = 'No documents found';
-  static const String stringNoDataFound = 'No data available';
-  static const String stringUnsupportedFileType =
-      'Unsupported file type selected';
-  static const String stringNoFileSelected = 'No file selected';
-
-  // warnings
-  static const String stringFillAll = 'Please fill all fields';
-  static const String stringNoImageSelected = 'No image selected.';
-  static const String stringPermsDenied =
+  // Warnings
+  static const String fillAllFields = 'Please fill all fields';
+  static const String noImageSelected = 'No image selected.';
+  static const String permissionDenied =
       'Permission denied. Please enable permissions from settings.';
 
-  // others
-  static const String stringSubmit = 'SUBMIT';
-  static const String stringUpdate = 'UPDATE';
-  static const String stringEdit = 'EDIT';
-  static const String stringPickedFile = 'Picked file';
-  static const String stringFilePath = 'File path';
+  // File info
+  static const String pickedFile = 'Picked file';
+  static const String filePath = 'File path';
 
-  // Share doc
-  static const String stringShareDoc = 'Share Document';
+  // Share document
+  static const String shareDoc = 'Share Document';
+}
+
+class ErrorMessages {
+  // General error messages
+  static const String error = 'Error:';
+  static const String deleteDocSuccess = 'Document deleted successfully!';
+  static const String noDocsFound = 'No documents found';
+  static const String noDataFound = 'No data available';
+  static const String unsupportedFileType = 'Unsupported file type selected';
+  static const String noFileSelected = 'No file selected';
+
+  // Database errors
+  static const String failedToFetchDoc = 'Failed to fetch documents from';
+  static const String failedToAddDoc = 'Failed to add document to';
+  static const String failedToUpdateDoc = 'Failed to update document in';
+  static const String failedToDeleteDoc = 'Failed to delete document from';
+}
+
+class DbCollections {
+  // Firestore collections
+  static const String users = 'users';
+  static const String docs = 'docs';
+  static const String loggedInUserData = 'loggedInUserData';
+  static const String documentsDb = 'documents.db';
 }
 
 class FileExtensions {
-  static const List<String> imageExtensions = ['jpg', 'jpeg', 'png'];
-  static const List<String> docExtensions = ['pdf'];
+  // Supported file extensions
+  static const List<String> image = ['jpg', 'jpeg', 'png'];
+  static const List<String> document = ['pdf'];
 }

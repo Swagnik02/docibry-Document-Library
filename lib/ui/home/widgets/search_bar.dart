@@ -21,7 +21,7 @@ class _CustomSearchBarState extends State<CustomSearchBar>
       children: [
         if (!_isActive)
           Text(
-            StringConstants.appName,
+            AppStrings.appName,
             style: Theme.of(context).textTheme.headlineLarge,
           ),
         Expanded(
@@ -43,7 +43,7 @@ class _CustomSearchBarState extends State<CustomSearchBar>
                           widget.onSearchQueryChanged(query);
                         },
                         decoration: InputDecoration(
-                          hintText: 'Search for document names',
+                          hintText: AppStrings.searchField,
                           prefixIcon: const Icon(Icons.search),
                           suffixIcon: IconButton(
                             onPressed: () {
