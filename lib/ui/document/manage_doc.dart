@@ -49,14 +49,6 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
   void initState() {
     super.initState();
 
-    if (!kIsWeb) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await requestPermission(Permission.storage);
-        await requestPermission(Permission.photos);
-        await requestPermission(Permission.manageExternalStorage);
-      });
-    }
-
     _selectedCategory = DocCategory.allCategories.isNotEmpty
         ? DocCategory.allCategories.first
         : null;

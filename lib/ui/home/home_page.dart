@@ -1,13 +1,16 @@
 import 'dart:math';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/constants/routes.dart';
+import 'package:docibry/services/permission_handler.dart';
 import 'package:docibry/ui/profile/profile_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/models/document_model.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'widgets/doc_card.dart';
 import 'widgets/doc_category_filter_chip.dart';
 import 'widgets/search_bar.dart';
@@ -39,6 +42,14 @@ class HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     context.read<DocumentBloc>().add(GetDocument());
+
+    if (!kIsWeb) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await requestPermission(Permission.storage);
+        await requestPermission(Permission.photos);
+        await requestPermission(Permission.manageExternalStorage);
+      });
+    }
   }
 
   @override
