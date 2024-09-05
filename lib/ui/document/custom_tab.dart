@@ -58,7 +58,7 @@ class CustomTabBarViewState extends State<CustomTabBarView>
             dividerColor: Colors.transparent,
             labelColor: Theme.of(context).colorScheme.surfaceContainerLow,
             unselectedLabelColor: Colors.black,
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+            // labelStyle: const TextStyle(fontWeight: FontWeight.bold),
             unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
             tabs: widget.tabs,
           ),
