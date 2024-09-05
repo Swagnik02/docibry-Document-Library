@@ -5,7 +5,6 @@ import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/services/file_converter.dart';
-import 'package:docibry/services/permission_handler.dart';
 import 'package:docibry/ui/shareDoc/share_doc_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:docibry/ui/widgets/custom_show_snackbar.dart';
@@ -16,7 +15,6 @@ import 'package:docibry/ui/document/custom_tab.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class ManageDocumentPage extends StatefulWidget {
   final bool isAdd;

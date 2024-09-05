@@ -163,31 +163,40 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  SingleChildScrollView _categoryFilters() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            DocCategoryFilterChip(
-              label: DocCategory.all,
-              isSelected: selectedFilter == DocCategory.all,
-              onSelected: _onCategorySelected,
-            ),
-            ...DocCategory.allCategories
-                .where((category) => category != DocCategory.all)
-                .map((category) {
-              return DocCategoryFilterChip(
-                label: category,
-                isSelected: selectedFilter == category,
-                onSelected: _onCategorySelected,
-              );
-            }),
-          ],
-        ),
+  Widget _categoryFilters() {
+    // Create a list of filter chips
+    var _filters = [
+      DocCategoryFilterChip(
+        label: DocCategory.all,
+        isSelected: selectedFilter == DocCategory.all,
+        onSelected: _onCategorySelected,
       ),
-    );
+      ...DocCategory.allCategories
+          .where((category) => category != DocCategory.all)
+          .map((category) {
+        return DocCategoryFilterChip(
+          label: category,
+          isSelected: selectedFilter == category,
+          onSelected: _onCategorySelected,
+        );
+      }).toList(),
+    ];
+
+    return kIsWeb
+        ? Wrap(
+            spacing: 3.0,
+            runSpacing: 3.0,
+            children: _filters,
+          )
+        : SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: _filters,
+              ),
+            ),
+          );
   }
 }
