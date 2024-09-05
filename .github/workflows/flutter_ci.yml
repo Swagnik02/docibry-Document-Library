@@ -39,15 +39,15 @@ jobs:
       # Build apk.
       - run: flutter build apk --release --split-per-abi
 
-      # Build ipa
-      - run: |
-          flutter build ios --no-codesign
-          cd build/ios/iphoneos
-          mkdir Payload
-          cd Payload
-          ln -s ../Runner.app
-          cd ..
-          zip -r app.ipa Payload
+      # # Build ipa
+      # - run: |
+      #     flutter build ios --no-codesign
+      #     cd build/ios/iphoneos
+      #     mkdir Payload
+      #     cd Payload
+      #     ln -s ../Runner.app
+      #     cd ..
+      #     zip -r app.ipa Payload
       # Upload generated apk to the release.
       - name: Push to Releases
         uses: ncipollo/release-action@v1.14.0
