@@ -54,7 +54,10 @@ class DocCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 docModel.docName,
-                style: Theme.of(context).textTheme.displaySmall,
+                style: Theme.of(context)
+                    .textTheme
+                    .displaySmall
+                    ?.copyWith(fontWeight: FontWeight.w600),
               ),
               Text(
                 overflow: TextOverflow.ellipsis,

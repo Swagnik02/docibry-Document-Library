@@ -44,7 +44,7 @@ class DocibryApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: AppStrings.appFullName,
       theme: ThemeData(
-        textTheme: GoogleFonts.shantellSansTextTheme(),
+        textTheme: GoogleFonts.montserratTextTheme(),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
       ),
       home: AuthPage(),

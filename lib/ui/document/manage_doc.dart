@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io' as io;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/services/file_converter.dart';
+import 'package:docibry/services/user_data_service.dart';
 import 'package:docibry/ui/shareDoc/share_doc_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:docibry/ui/widgets/custom_show_snackbar.dart';
 import 'package:docibry/ui/widgets/custom_text_field.dart';
@@ -148,7 +151,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
   Widget _bodyContent() {
     final windowWidth = MediaQuery.of(context).size.width;
 
-    if (windowWidth > 720) {
+    if (windowWidth > 650) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -369,6 +372,26 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
         ),
       ),
     );
+  }
+
+  Future<void> _handleSubmit1() async {
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    final userUid = await UserDataService().getUserUid();
+
+    log('uid: $userUid');
+    // log('docFile: ' + _imageBytes.toString());
+    try {
+      DocumentReference userDocRef =
+          _firestore.collection(DbCollections.users).doc(userUid.toString());
+      await userDocRef.collection(DbCollections.docs).doc('1213456').set(
+        {
+          'docName': _docNameController.text,
+          'docFile': _imageBytes.toString(),
+        },
+      );
+    } catch (error) {
+      log('${ErrorMessages.failedToAddDoc} Firebase: $error');
+    }
   }
 
   Future<void> _handleSubmit() async {

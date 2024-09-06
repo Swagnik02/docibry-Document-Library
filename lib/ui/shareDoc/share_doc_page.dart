@@ -95,7 +95,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     final windowHeight = MediaQuery.of(context).size.height;
 
     return SizedBox(
-      height: windowHeight - 200,
+      height: windowHeight - 400,
       width: double.infinity,
       child: Card(
         elevation: 3,
