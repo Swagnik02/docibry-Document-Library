@@ -29,7 +29,7 @@ Future<void> webSaveToDeviceJpg(String base64String, String title) async {
     final blob = html.Blob([Uint8List.fromList(bytes)]);
     final url = html.Url.createObjectUrlFromBlob(blob);
 
-    final anchor = html.AnchorElement(href: url)
+    html.AnchorElement(href: url)
       ..setAttribute('download', '$title.jpg')
       ..click();
 
@@ -54,7 +54,7 @@ Future<void> webSaveToDevicePdf(String base64String, String title) async {
     final blob = html.Blob([Uint8List.fromList(pdfBytes)]);
     final url = html.Url.createObjectUrlFromBlob(blob);
 
-    final anchor = html.AnchorElement(href: url)
+    html.AnchorElement(href: url)
       ..setAttribute('download', '$title.pdf')
       ..click();
 

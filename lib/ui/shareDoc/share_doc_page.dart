@@ -45,6 +45,8 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
 
   @override
   Widget build(BuildContext context) {
+    final window = MediaQuery.of(context).size;
+
     return BlocListener<DocumentBloc, DocumentState>(
       listener: (context, state) {},
       child: Scaffold(
@@ -55,7 +57,8 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              _imageDisplay(context),
+              _imageDisplay(window),
+              if (kIsWeb) SizedBox(height: 30),
               if (!kIsWeb) _shareTextField(),
               if (!kIsWeb)
                 Row(
@@ -63,25 +66,34 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
                   children: [
                     const Text('Share as '),
                     const Icon(Icons.share_outlined),
-                    _btnShareAsImg(context),
-                    _btnShareAsPdf(context),
+                    _btnShareAsImg(window),
+                    _btnShareAsPdf(),
                   ],
                 ),
               kIsWeb
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _btnSaveToDeviceJpg(context),
-                        _btnSaveToDevicePdf(context),
-                      ],
-                    )
+                  ? window.width < 600
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            _btnSaveToDeviceJpg(window * 2),
+                            const SizedBox(height: 30),
+                            _btnSaveToDevicePdf(window * 2),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _btnSaveToDeviceJpg(window),
+                            _btnSaveToDevicePdf(window),
+                          ],
+                        )
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text('Save to device as '),
                         const Icon(Icons.save_alt_rounded),
-                        _btnSaveToDeviceJpg(context),
-                        _btnSaveToDevicePdf(context),
+                        _btnSaveToDeviceJpg(window),
+                        _btnSaveToDevicePdf(window),
                       ],
                     ),
             ],
@@ -91,12 +103,9 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     );
   }
 
-  Widget _imageDisplay(BuildContext context) {
-    final windowHeight = MediaQuery.of(context).size.height;
-
+  Widget _imageDisplay(Size window) {
     return SizedBox(
-      height: windowHeight - 400,
-      width: double.infinity,
+      height: kIsWeb ? window.height / 2 : window.height / 3,
       child: Card(
         elevation: 3,
         child: ClipRRect(
@@ -108,7 +117,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
   }
 
   // share as buttons
-  Widget _btnShareAsImg(BuildContext context) {
+  Widget _btnShareAsImg(Size window) {
     return IconButton.outlined(
       onPressed: () async {
         try {
@@ -124,7 +133,7 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     );
   }
 
-  Widget _btnShareAsPdf(BuildContext context) {
+  Widget _btnShareAsPdf() {
     return IconButton.outlined(
       onPressed: () async {
         try {
@@ -141,11 +150,10 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
   }
 
   // save to device buttons
-  Widget _btnSaveToDeviceJpg(BuildContext context) {
-    final windowWidth = MediaQuery.of(context).size.width;
+  Widget _btnSaveToDeviceJpg(Size window) {
     if (kIsWeb) {
       return SizedBox(
-        width: windowWidth / 3,
+        width: window.width / 3,
         child: ElevatedButton(
           onPressed: () async {
             _save2device(true);
@@ -172,12 +180,10 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     }
   }
 
-  Widget _btnSaveToDevicePdf(BuildContext context) {
-    final windowWidth = MediaQuery.of(context).size.width;
-
+  Widget _btnSaveToDevicePdf(Size window) {
     if (kIsWeb) {
       return SizedBox(
-        width: windowWidth / 3,
+        width: window.width / 3,
         child: ElevatedButton(
           onPressed: () async {
             _save2device(false);
@@ -235,9 +241,11 @@ class ShareDocumentPageState extends State<ShareDocumentPage>
     await requestPermission(Permission.manageExternalStorage);
     try {
       if (asImage) {
-        await saveToDeviceJpg(widget.document!.docFile, widget.document!.docId);
+        await saveToDeviceJpg(
+            widget.document!.docFile, widget.document!.docName);
       } else {
-        await saveToDevicePdf(widget.document!.docFile, widget.document!.docId);
+        await saveToDevicePdf(
+            widget.document!.docFile, widget.document!.docName);
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
