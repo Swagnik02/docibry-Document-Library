@@ -1,14 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io' as io;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:docibry/blocs/document/document_bloc.dart';
 import 'package:docibry/blocs/document/document_event.dart';
 import 'package:docibry/blocs/document/document_state.dart';
 import 'package:docibry/services/file_converter.dart';
-import 'package:docibry/services/user_data_service.dart';
 import 'package:docibry/ui/shareDoc/share_doc_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:docibry/ui/widgets/custom_show_snackbar.dart';
 import 'package:docibry/ui/widgets/custom_text_field.dart';
@@ -36,7 +33,7 @@ class ManageDocumentPage extends StatefulWidget {
 class ManageDocumentPageState extends State<ManageDocumentPage>
     with SingleTickerProviderStateMixin {
   late bool _isEditMode;
-  io.File? _image;
+  io.File? _imageFile;
   Uint8List? _imageBytes;
   bool _isLoading = false;
 
@@ -225,19 +222,13 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
   }
 
   Widget tab1() {
-    final Widget imageWidget = _imageBytes != null || _image != null
-        ? kIsWeb
-            ? Image.memory(
-                _imageBytes!,
-                fit: BoxFit.contain,
-              )
-            : ClipRRect(
-                borderRadius: BorderRadius.circular(10.0),
-                child: Image.file(
-                  _image!,
-                  fit: BoxFit.contain,
-                ),
-              )
+    final Widget imageWidget = _imageBytes != null
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(10.0),
+            child: Image.memory(
+              _imageBytes!,
+              fit: BoxFit.contain,
+            ))
         : widget.isAdd
             ? const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -246,7 +237,11 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
                   Text(AppStrings.addFile),
                 ],
               )
-            : Image.memory(base64ToUint8List(widget.document!.docFile));
+            : Image.memory(
+                Uint8List.fromList(
+                  base64Decode(widget.document!.docFile),
+                ),
+              );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5),
@@ -346,7 +341,7 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     final windowWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Container(
+      child: SizedBox(
         width: windowWidth / 2,
         child: FilledButton(
           onPressed: widget.isAdd
@@ -374,42 +369,13 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
     );
   }
 
-  Future<void> _handleSubmit1() async {
-    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    final userUid = await UserDataService().getUserUid();
-
-    log('uid: $userUid');
-    // log('docFile: ' + _imageBytes.toString());
-    try {
-      DocumentReference userDocRef =
-          _firestore.collection(DbCollections.users).doc(userUid.toString());
-      await userDocRef.collection(DbCollections.docs).doc('1213456').set(
-        {
-          'docName': _docNameController.text,
-          'docFile': _imageBytes.toString(),
-        },
-      );
-    } catch (error) {
-      log('${ErrorMessages.failedToAddDoc} Firebase: $error');
-    }
-  }
-
   Future<void> _handleSubmit() async {
     if (_docNameController.text.isNotEmpty && _selectedCategory != null) {
       setState(() {
         _isLoading = true;
       });
 
-      var encryptedDocImage;
-      if (kIsWeb) {
-        if (_imageBytes != null) {
-          encryptedDocImage = base64Encode(_imageBytes!);
-        }
-      } else {
-        if (_image != null) {
-          encryptedDocImage = await fileToBase64(_image!);
-        }
-      }
+      var encryptedDocImage = base64Encode(_imageBytes!);
 
       if (mounted) {
         context.read<DocumentBloc>().add(
@@ -456,8 +422,8 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
             ? _holderNameController.text
             : ' ',
         dateAdded: widget.document!.dateAdded,
-        docFile: _image != null
-            ? await fileToBase64(_image!)
+        docFile: _imageBytes != null
+            ? _imageBytes.toString()
             : widget.document!.docFile,
       );
       if (mounted) {
@@ -493,41 +459,45 @@ class ManageDocumentPageState extends State<ManageDocumentPage>
       allowedExtensions: [...FileExtensions.image, ...FileExtensions.document],
     );
 
-    if (result != null) {
-      final pickedFile = result.files.single;
-      log('Picked file: ${pickedFile.name}');
+    if (result == null) {
+      log('No file selected.');
+      return;
+    }
 
-      // Web platform: Handle file using bytes
-      if (kIsWeb) {
-        _imageBytes = pickedFile.bytes;
-        if (_imageBytes != null) {
-          log('File bytes length: ${_imageBytes!.length}');
-          setState(() {
-            _image = null;
-          });
-        } else {
-          log('No bytes found for the selected file.');
-        }
-      }
-      // Mobile/Desktop platform: Handle file using file path
-      else {
-        log('File path: ${pickedFile.path}');
+    final pickedFile = result.files.single;
+    log('Picked file: ${pickedFile.name}');
 
-        if (FileExtensions.document.contains(pickedFile.extension)) {
-          io.File? convertedImage = await pdfToImage(pickedFile);
-          setState(() {
-            _image = convertedImage;
-          });
-        } else if (FileExtensions.image.contains(pickedFile.extension)) {
-          setState(() {
-            _image = io.File(pickedFile.path!);
-          });
-        } else {
-          log('Unsupported file type.');
-        }
+    Uint8List? fileBytes;
+
+    // Handle document (PDF) case
+    if (FileExtensions.document.contains(pickedFile.extension)) {
+      fileBytes = await pdfToUint8List(pickedFile);
+      log('Converted PDF to Uint8List');
+    }
+    // Handle image case for both web and non-web
+    else if (FileExtensions.image.contains(pickedFile.extension)) {
+      if (!kIsWeb && pickedFile.path != null) {
+        io.File file = io.File(pickedFile.path!);
+        fileBytes = await file.readAsBytes();
+        log('Read image from file path');
+      } else {
+        // For web, use the bytes directly
+        fileBytes = pickedFile.bytes;
+        log('Read image from bytes (web)');
       }
     } else {
-      log('No file selected.');
+      log('Unsupported file type.');
+      return;
+    }
+
+    // Set the image bytes if valid
+    if (fileBytes != null) {
+      setState(() {
+        _imageBytes = fileBytes;
+      });
+      log('File bytes length: ${_imageBytes!.length}');
+    } else {
+      log('Failed to retrieve file bytes.');
     }
   }
 }

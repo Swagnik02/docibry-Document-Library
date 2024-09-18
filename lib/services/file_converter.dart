@@ -41,9 +41,19 @@ Future<XFile> base64ToPdf(String base64String, String fileName) async {
   return XFile(filePath);
 }
 
-Future<File?> pdfToImage(PlatformFile pdf) async {
+Future<Uint8List?> pdfToUint8List(PlatformFile pdf) async {
   try {
-    final document = await PdfDocument.openFile(pdf.path!);
+    PdfDocument document;
+
+    // Check if the app is running in a web environment
+    if (kIsWeb) {
+      // Use bytes directly for web
+      document = await PdfDocument.openData(pdf.bytes!);
+    } else {
+      // Use file path for non-web platforms
+      document = await PdfDocument.openFile(pdf.path!);
+    }
+
     final page = await document.getPage(1);
     final pageImage = await page.render(
       width: page.width,
@@ -52,28 +62,17 @@ Future<File?> pdfToImage(PlatformFile pdf) async {
     );
     await page.close();
 
-    final directory = await getApplicationDocumentsDirectory();
-    final imagePath = '${directory.path}/converted_image.png';
-    final imageFile = File(imagePath);
-    log('file converted');
-    await imageFile.writeAsBytes(pageImage!.bytes);
-    return imageFile;
+    return pageImage?.bytes;
   } catch (e) {
     log('Error converting PDF to image: $e');
     return null;
   }
 }
 
-// Helper method to convert a file to a Base64 string
-Future<String> fileToBase64(File file) async {
+Future<Uint8List> fileToUint8List(PlatformFile imageFile) async {
+  final file = File(imageFile.path!);
   final bytes = await file.readAsBytes();
-  return base64Encode(bytes);
-}
-
-// Helper method to convert a Base64 string to a Uint8List
-Uint8List base64ToUint8List(String base64String) {
-  final decodedBytes = base64Decode(base64String);
-  return Uint8List.fromList(decodedBytes);
+  return Uint8List.fromList(bytes); // Convert image to Uint8List
 }
 
 Image base64ToImage(String base64String) {
