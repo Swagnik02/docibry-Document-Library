@@ -160,9 +160,6 @@ class _AuthPageState extends State<AuthPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => log(window.width.toString()),
-      ),
     );
   }
 
@@ -226,11 +223,6 @@ class _AuthPageState extends State<AuthPage> {
           _authLogoSection(),
           _authFields(),
           _authActionButtons(),
-          if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.only(top: 20),
-              child: Center(child: CircularProgressIndicator()),
-            ),
         ],
       ),
     );
@@ -241,6 +233,7 @@ class _AuthPageState extends State<AuthPage> {
       alignment: Alignment.topCenter,
       child: Column(
         children: [
+          SizedBox(height: 20),
           Image.asset('assets/logo.png', height: 150),
           const SizedBox(height: 20),
           Text(
