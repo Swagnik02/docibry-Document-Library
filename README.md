@@ -6,6 +6,25 @@ Docibry is a document management and sharing application built using Flutter and
 
 ## 🛠 Features
 
+<p float="left">
+        <img src="https://github.com/user-attachments/assets/ba400787-3fee-4636-a3f8-d9e2bdae14d0" align="right" width="180"/>
+</p>
+
+### Cross Platform
+
+- Easily handle your documents from web anytime
+- Access
+- Manage
+- Download
+- Share
+
+Visit Link: [https://docibry.web.app](https://docibry.web.app).
+
+<!-- [![Docibry Web](https://img.shields.io/badge/visit-WebApp-brightgreen.svg?style=flat)](http://makeapullrequest.com)
+
+![Docibry Web App](https://img.shields.io/badge/visit-Webapp-brightgreen.svg?style=flat&logoColor=%23F7A81B&logoSize=auto&color=%238f4c38&link=https%3A%2F%2Fdocibry.web.app)
+ -->
+
 ### User Authentication
 
 - Secure login and registration using **Firebase Authentication**.
