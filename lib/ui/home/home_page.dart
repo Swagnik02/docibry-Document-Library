@@ -93,12 +93,17 @@ class HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            body: Column(
-              children: [
-                _categoryFilters(),
-                _docs(filteredDocs),
-              ],
-            ),
+            body: Stack(children: [
+              Center(
+                  child: Opacity(
+                      opacity: 0.1, child: Image.asset('assets/logo.png'))),
+              Column(
+                children: [
+                  _categoryFilters(),
+                  _docs(filteredDocs),
+                ],
+              ),
+            ]),
             floatingActionButton: FloatingActionButton(
               onPressed: () => Navigator.pushNamed(context, addDocRoute),
               child: const Icon(Icons.add),

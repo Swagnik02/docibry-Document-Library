@@ -56,7 +56,7 @@ class DocCard extends StatelessWidget {
                 docModel.docName,
                 style: Theme.of(context)
                     .textTheme
-                    .displaySmall
+                    .headlineLarge
                     ?.copyWith(fontWeight: FontWeight.w600),
               ),
               Text(

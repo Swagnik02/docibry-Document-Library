@@ -21,11 +21,26 @@ class _AuthPageState extends State<AuthPage> {
   bool _isLogin = true;
   bool _isLoading = false;
 
+  // onboarding page
+  final PageController pageController = PageController(initialPage: 0);
+  int _currentPage = 0;
+
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkUserLoggedIn();
+    });
+    pageController.addListener(() {
+      setState(() {
+        _currentPage = pageController.page?.round() ?? 0;
+      });
     });
   }
 
@@ -64,7 +79,6 @@ class _AuthPageState extends State<AuthPage> {
         });
       }
 
-      // Initialize local database service and save user details
       if (!kIsWeb) {
         final localDbService = LocalDbService();
         await localDbService.initLocalDb();
@@ -91,8 +105,96 @@ class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: AnimatedSwitcher(
+        switchOutCurve: Curves.easeIn,
+        duration: const Duration(milliseconds: 500),
+        child: _isOnboarding ? onboardingBody(context) : authBody(context),
+      ),
+    );
+  }
+
+  bool get _isOnboarding => _currentPage < 4;
+
+  Stack onboardingBody(BuildContext context) {
+    return Stack(
+      key: const ValueKey('onboarding'),
+      alignment: Alignment.center,
+      children: [
+        PageView(
+          controller: pageController,
+          onPageChanged: (value) {
+            setState(() {
+              _currentPage = value;
+            });
+          },
+          children: [
+            _page(
+              context: context,
+              pageIndex: 0,
+              imageUrl: 'assets/logo.png',
+              title: AppStrings.appFullName,
+              desc: '',
+            ),
+            _page(
+              context: context,
+              pageIndex: 1,
+              imageUrl: 'assets/manage.png',
+              title: 'Manage Documents Easily',
+              desc:
+                  'Upload, categorize, and manage your documents from anywhere, anytime with seamless access.',
+            ),
+            _page(
+              context: context,
+              pageIndex: 2,
+              imageUrl: 'assets/share.png',
+              title: 'Share Files Effortlessly',
+              desc:
+                  'Share documents instantly with a tap, download them in JPG or PDF, or save them offline.',
+            ),
+            _page(
+              context: context,
+              pageIndex: 3,
+              imageUrl: 'assets/web.png',
+              title: 'Cross-Platform Access',
+              desc:
+                  'Access your files anytime from the docibry web-app \n https://docibry.vercel.app',
+            ),
+          ],
+        ),
+        Positioned(
+          bottom: 200,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(4, (index) {
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                width: _currentPage == index ? 30 : 8,
+                height: 8,
+                margin: const EdgeInsets.all(2.0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget authBody(BuildContext context) {
+    return Scaffold(
+      key: const ValueKey('authbody'),
       appBar: AppBar(
         title: Text(_isLogin ? 'Login' : 'Register'),
+        leading: IconButton(
+            onPressed: () {
+              setState(() {
+                _currentPage = 0;
+              });
+            },
+            icon: Icon(Icons.arrow_back_ios_new_rounded)),
       ),
       body: Center(
         child: Padding(
@@ -136,5 +238,99 @@ class _AuthPageState extends State<AuthPage> {
         ),
       ),
     );
+  }
+
+  Widget _page({
+    required int pageIndex,
+    required String imageUrl,
+    required String title,
+    required String desc,
+    required BuildContext context,
+  }) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(height: 40),
+        Image.asset(
+          imageUrl,
+          height: 250,
+        ),
+        const SizedBox(height: 20),
+        Text(
+          title,
+          style: Theme.of(context)
+              .textTheme
+              .titleLarge!
+              .copyWith(color: Theme.of(context).colorScheme.primary),
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 50),
+          child: Text(
+            desc,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+        ),
+        const SizedBox(height: 120),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Row(
+            mainAxisAlignment: pageIndex == 3
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.spaceBetween,
+            children: [
+              Visibility(
+                visible: pageIndex != 3,
+                child: OutlinedButton(
+                  onPressed: () => _toAuth(),
+                  child: const Text(
+                    'Skip',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              pageIndex == 3
+                  ? ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        elevation: 1,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                      ),
+                      onPressed: () {
+                        _toAuth();
+                      },
+                      child: const Text(
+                        'Get Started',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : FilledButton(
+                      onPressed: () {
+                        pageController.nextPage(
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.decelerate,
+                        );
+                      },
+                      child: const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: Colors.white,
+                      ),
+                    ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _toAuth() {
+    return setState(() {
+      _currentPage = 4;
+    });
   }
 }
