@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:docibry/constants/string_constants.dart';
 import 'package:docibry/repositories/local_db_service.dart';
 import 'package:docibry/ui/home/home_page.dart';
